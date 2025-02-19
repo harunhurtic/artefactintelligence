@@ -12,8 +12,14 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
+
+/* Un-comment out this part if you want to run the app locally
+app.use(cors()); 
+*/
+
+/* Comment out this whole "app.use" part out if you want to run the app locally (and replace all urls in front of /fetch in Index.html), and then un-comment the "app.use(cors());" above it. */
 app.use(cors({
-    origin: "https://artefactintelligence.hurtic.net",  // 🔄 Replace with your frontend URL
+    origin: "https://artefactintelligencestudy.hurtic.net",  // 🔄 Replace url with your frontend URL
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
@@ -21,7 +27,7 @@ app.use(cors({
 const OPENAI_HEADERS = {
     "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
     "Content-Type": "application/json",
-    "OpenAI-Beta": "assistants=v2"  // ✅ Required for Assistants API v2
+    "OpenAI-Beta": "assistants=v2"  // Required for Assistants API v2
 };
 
 // Connect to MongoDB
@@ -73,33 +79,51 @@ app.get("/", (req, res) => {
 app.post("/fetch-description", async (req, res) => {
     console.log("🛠️ Received fetch-description request:", req.body);
 
-    const { artefact, originalDescription, profile } = req.body;
+    const { artefact, originalDescription, profile, threadId } = req.body;
 
     if (!artefact || !originalDescription || !profile) {
         console.error("❌ Missing required fields");
-        return res.status(400).json({ error: "Missing artefact, profile, or originalDescription" });
+        return res.status(400).json({ error: "Missing artefact or profile" });
     }
 
-    let prompt = `Adapt the following artefact description and make it more engaging for a museum visitor with the ${profile} profile while preserving factual accuracy. Ensure the adaptation is a seamless museum description that aligns with their preferences, interests, and motivations, without explicitly mentioning their profile or adding unnecessary details: \n Artefact: ${artefact}\n Description: ${originalDescription}`;
-
     try {
-        console.log("📝 Sending prompt to Assistant...");
-        const threadResponse = await fetch("https://api.openai.com/v1/threads", {
-            method: "POST",
-            headers: OPENAI_HEADERS,
-            body: JSON.stringify({}),
-            timeout: 60000,
-        });
+        let thread;
 
-        const threadData = await threadResponse.json();
-        console.log("🔍 Thread Data:", JSON.stringify(threadData, null, 2));
-
-        if (!threadData.id) {
-            console.error("❌ Failed to create thread.");
-            return res.status(500).json({ response: "Error: Could not create assistant thread." });
+        if (threadId) {
+            thread = await Thread.findOne({ threadId });
+            console.log(`🔄 Using existing Thread ID: ${threadId}`);
         }
 
-        const messageResponse = await fetch(`https://api.openai.com/v1/threads/${threadData.id}/messages`, {
+        if (!thread) {
+            console.log("🟢 Creating a new thread...");
+            const threadResponse = await fetch("https://api.openai.com/v1/threads", {
+                method: "POST",
+                headers: OPENAI_HEADERS,
+                timeout: 60000,
+            });
+
+            const threadData = await threadResponse.json();
+
+            if (!threadData.id) {
+                console.error("❌ Failed to create thread.");
+                return res.status(500).json({ response: "Error: Could not create assistant thread." });
+            }
+
+            thread = new Thread({
+                threadId: threadData.id,
+                profile,
+                artefact,
+                createdAt: new Date(),
+                messages: []
+            });
+
+            await thread.save();
+            console.log(`✅ Created Thread ID: ${thread.threadId}`);
+        }
+
+        let prompt = `Adapt the following artefact description and make it more engaging for a museum visitor with the ${profile} profile while preserving factual accuracy. Artefact: ${artefact}. Description: ${originalDescription}`;
+
+        const messageResponse = await fetch(`https://api.openai.com/v1/threads/${thread.threadId}/messages`, {
             method: "POST",
             headers: OPENAI_HEADERS,
             body: JSON.stringify({ role: "user", content: prompt }),
@@ -107,15 +131,21 @@ app.post("/fetch-description", async (req, res) => {
         });
 
         const messageData = await messageResponse.json();
-        console.log("🔍 Message Data:", JSON.stringify(messageData, null, 2));
 
         if (!messageData.id) {
             console.error("❌ Failed to add message.");
             return res.status(500).json({ response: "Error: Could not send prompt to assistant." });
         }
 
-        console.log("▶️ Running Assistant...");
-        const runResponse = await fetch(`https://api.openai.com/v1/threads/${threadData.id}/runs`, {
+        thread.messages.push({
+            role: "user",
+            content: prompt,
+            timestamp: new Date()
+        });
+
+        await thread.save();
+
+        const runResponse = await fetch(`https://api.openai.com/v1/threads/${thread.threadId}/runs`, {
             method: "POST",
             headers: OPENAI_HEADERS,
             body: JSON.stringify({ assistant_id: process.env.ASSISTANT_ID }),
@@ -123,15 +153,11 @@ app.post("/fetch-description", async (req, res) => {
         });
 
         const runData = await runResponse.json();
-        console.log("🔍 Run Data:", JSON.stringify(runData, null, 2));
 
         if (!runData.id) {
             console.error("❌ Failed to start assistant.");
             return res.status(500).json({ response: "Error: Assistant could not start processing." });
         }
-
-        const runId = runData.id;
-        console.log(`✅ Run started. Run ID: ${runId}`);
 
         let status = "in_progress";
         let responseContent = "";
@@ -146,46 +172,35 @@ app.post("/fetch-description", async (req, res) => {
             await new Promise(resolve => setTimeout(resolve, 3000));
             attemptCount++;
 
-            const checkRunResponse = await fetch(`https://api.openai.com/v1/threads/${threadData.id}/runs/${runId}`, {
+            const checkRunResponse = await fetch(`https://api.openai.com/v1/threads/${thread.threadId}/runs/${runData.id}`, {
                 headers: OPENAI_HEADERS,
             });
 
             const checkRunData = await checkRunResponse.json();
-            console.log("⏳ Assistant Status:", checkRunData.status);
-
             status = checkRunData.status;
 
-            if (status === "failed") {
-                console.error("❌ Assistant Run Failed:", checkRunData);
-                return res.status(500).json({ response: "Error: Assistant run failed." });
-            }
-
             if (status === "completed") {
-                console.log("📩 Fetching Assistant's Response...");
-                const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${threadData.id}/messages`, {
+                const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${thread.threadId}/messages`, {
                     headers: OPENAI_HEADERS,
                 });
 
                 const messagesData = await messagesResponse.json();
-                console.log("📥 Messages Data:", JSON.stringify(messagesData, null, 2));
-
                 const assistantMessage = messagesData.data.find(msg => msg.role === "assistant");
 
-                if (!assistantMessage || !assistantMessage.content || !assistantMessage.content[0]) {
-                    console.error("⚠️ No valid response from Assistant.");
-                    return res.status(500).json({ response: `Adaptation failed. However, here's the original description:\n\n${originalDescription}` });
-                }
+                responseContent = assistantMessage?.content[0]?.text?.value || "Adaptation failed.";
 
-                responseContent = assistantMessage.content[0].text.value;
+                thread.messages.push({
+                    role: "assistant",
+                    content: responseContent,
+                    timestamp: new Date()
+                });
+
+                await thread.save();
                 break;
             }
         }
 
-        if (!responseContent) {
-            responseContent = `Adaptation failed. However, here's the original description:\n\n${originalDescription}`;
-        }
-
-        res.json({ response: responseContent });
+        res.json({ response: responseContent, threadId: thread.threadId });
 
     } catch (error) {
         console.error("❌ Error with Assistant:", error);
@@ -198,33 +213,32 @@ app.post("/fetch-description", async (req, res) => {
 app.post("/fetch-more-info", async (req, res) => {
     console.log("🛠️ Received fetch-more-info request:", req.body);
 
-    const { artefact, profile } = req.body;
+    const { artefact, profile, threadId } = req.body;
 
-    if (!artefact || !profile) {
-        console.error("❌ Missing required fields: artefact or profile");
-        return res.status(400).json({ error: "Missing artefact or profile" });
+    if (!artefact || !profile || !threadId) {
+        console.error("❌ Missing required fields: artefact, profile, or threadId");
+        return res.status(400).json({ error: "Missing artefact, profile, or threadId" });
     }
 
-    let prompt = `The visitor with the "${profile}" profile wants to learn more about the "${artefact}". Provide additional information.`;
-
     try {
-        console.log("📝 Sending additional prompt to Assistant...");
-        const threadResponse = await fetch("https://api.openai.com/v1/threads", {
-            method: "POST",
-            headers: OPENAI_HEADERS,
-            body: JSON.stringify({}),
-            timeout: 60000,
-        });
+        const thread = await Thread.findOne({ threadId });
 
-        const threadData = await threadResponse.json();
-        console.log("🔍 Thread Data:", JSON.stringify(threadData, null, 2));
-
-        if (!threadData.id) {
-            console.error("❌ Failed to create thread.");
-            return res.status(500).json({ response: "Error: Could not create assistant thread." });
+        if (!thread) {
+            console.error("❌ No existing thread found.");
+            return res.status(400).json({ error: "No existing thread found." });
         }
 
-        const messageResponse = await fetch(`https://api.openai.com/v1/threads/${threadData.id}/messages`, {
+        let prompt = `The visitor with the "${profile}" profile wants to learn more about the "${artefact}" artefact. Provide additional insights.`;
+
+        thread.messages.push({
+            role: "user",
+            content: prompt,
+            timestamp: new Date()
+        });
+
+        await thread.save();
+
+        const messageResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
             method: "POST",
             headers: OPENAI_HEADERS,
             body: JSON.stringify({ role: "user", content: prompt }),
@@ -232,15 +246,8 @@ app.post("/fetch-more-info", async (req, res) => {
         });
 
         const messageData = await messageResponse.json();
-        console.log("🔍 Message Data:", JSON.stringify(messageData, null, 2));
 
-        if (!messageData.id) {
-            console.error("❌ Failed to add message.");
-            return res.status(500).json({ response: "Error: Could not send prompt to assistant." });
-        }
-
-        console.log("▶️ Running Assistant...");
-        const runResponse = await fetch(`https://api.openai.com/v1/threads/${threadData.id}/runs`, {
+        const runResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs`, {
             method: "POST",
             headers: OPENAI_HEADERS,
             body: JSON.stringify({ assistant_id: process.env.ASSISTANT_ID }),
@@ -248,60 +255,37 @@ app.post("/fetch-more-info", async (req, res) => {
         });
 
         const runData = await runResponse.json();
-        console.log("🔍 Run Data:", JSON.stringify(runData, null, 2));
-
-        if (!runData.id) {
-            console.error("❌ Failed to start assistant.");
-            return res.status(500).json({ response: "Error: Assistant could not start processing." });
-        }
-
-        const runId = runData.id;
-        console.log(`✅ Run started. Run ID: ${runId}`);
 
         let status = "in_progress";
         let responseContent = "";
-        let attemptCount = 0;
 
         while (status === "in_progress" || status === "queued") {
-            if (attemptCount > 10) {
-                console.error("⏳ Assistant took too long. Timing out.");
-                return res.status(500).json({ response: "Error: Assistant took too long to respond." });
-            }
-
             await new Promise(resolve => setTimeout(resolve, 3000));
-            attemptCount++;
 
-            const checkRunResponse = await fetch(`https://api.openai.com/v1/threads/${threadData.id}/runs/${runId}`, {
+            const checkRunResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs/${runData.id}`, {
                 headers: OPENAI_HEADERS,
             });
 
             const checkRunData = await checkRunResponse.json();
-            console.log("⏳ Assistant Status:", checkRunData.status);
-
             status = checkRunData.status;
 
-            if (status === "failed") {
-                console.error("❌ Assistant Run Failed:", checkRunData);
-                return res.status(500).json({ response: "Error: Assistant run failed." });
-            }
-
             if (status === "completed") {
-                console.log("📩 Fetching Assistant's Response...");
-                const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${threadData.id}/messages`, {
+                const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
                     headers: OPENAI_HEADERS,
                 });
 
                 const messagesData = await messagesResponse.json();
-                console.log("📥 Messages Data:", JSON.stringify(messagesData, null, 2));
-
                 const assistantMessage = messagesData.data.find(msg => msg.role === "assistant");
 
-                if (!assistantMessage || !assistantMessage.content || !assistantMessage.content[0]) {
-                    console.error("⚠️ No valid response from Assistant.");
-                    return res.status(500).json({ response: "No additional information found." });
-                }
+                responseContent = assistantMessage?.content[0]?.text?.value || "No additional information found.";
 
-                responseContent = assistantMessage.content[0].text.value;
+                thread.messages.push({
+                    role: "assistant",
+                    content: responseContent,
+                    timestamp: new Date()
+                });
+
+                await thread.save();
                 break;
             }
         }
@@ -310,10 +294,9 @@ app.post("/fetch-more-info", async (req, res) => {
 
     } catch (error) {
         console.error("❌ Error fetching additional info:", error);
-        res.status(500).json({ response: "Could not get additional information." });
+        res.status(500).json({ response: "Failed to fetch additional information." });
     }
 });
-
 
 // API route for fetching TTS audio
 app.post("/fetch-tts", async (req, res) => {
@@ -341,7 +324,7 @@ app.post("/fetch-tts", async (req, res) => {
 });
 
 
-// ✅ Function to fetch TTS with automatic retries
+// Function to fetch TTS with automatic retries
 async function fetchTTSWithRetry(text, retries = 3) {
     for (let i = 0; i < retries; i++) {
         try {
@@ -407,6 +390,6 @@ console.log("🔑 OpenAI API Key:", process.env.OPENAI_API_KEY ? "Loaded" : "MIS
 console.log("🤖 Assistant ID:", process.env.ASSISTANT_ID ? "Loaded" : "MISSING");
 
 
-// ✅ Start server
+// Start server
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
