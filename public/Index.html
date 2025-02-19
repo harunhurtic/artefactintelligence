@@ -19,8 +19,9 @@
         let userResponses = {};
         let deliveryPreference = "Text-Based";
         let audio = null;
-        let participantId = "";  // Store participant ID
         let audioLoadTimeout = null;  // Global timeout tracker
+        let currentThreadId = null; // Global variable to store threadId
+        let controlsExpanded = true;  // Track expand/collapse state
 
         const questions = [
             {
@@ -102,46 +103,31 @@
 
             quizContainer.innerHTML = `
     <div class="artefacts-container">
-    <h1>Welcome to the Master's Thesis: <em>Artefact Intelligence</em> Proof-of-Concept!</h1>
-    
-    <p>
-        This proof-of-concept showcases how AI can personalize artefact descriptions in museums to better engage profiled visitors. 
-        Discover how tailored, AI-driven content can transform museum experiences 🏛️✨.
-    </p>
+        <h1>Welcome to the Master's Thesis: <em>Artefact Intelligence</em> Proof-of-Concept!</h1>
+        
+        <p>
+            This proof-of-concept showcases how AI can personalize artefact descriptions in museums to better engage profiled visitors. 
+            Discover how tailored, AI-driven content can transform museum experiences 🏛️✨
+        </p>
 
-    <p>
-        This app utilizes OpenAI's Assistants API (v2). The connected assistant runs on GPT-4o-mini, dynamically adapting content based on Falk's five visitor profiles. 
-        If the adaptations fail, it may be due to empty tokens or significant changes in OpenAI's API.
-    </p>
+        <p>
+            This app uses OpenAI's Assistants API (v2). The connected assistant runs on GPT-4o-mini, dynamically adapting content based on Falk's five visitor profiles. 
+            If the adaptations fail, it may be due to empty tokens or significant changes in OpenAI's API.
+        </p>
 
-    <p>
-        Curious about how it works? For detailed insights into the prompts, system instructions, and implementation, visit the 
-        <a href="https://github.com/SPL1TSY/artefactintelligence" target="_blank">GitHub repository</a>.
-    </p>
-     <p>
-        Want to read the Master's thesis? The link will be updated here when the master's thesis is delivered. (Right now it leads to GitHub page)
-        <a href="https://github.com/SPL1TSY/artefactintelligence" target="_blank">Read it here!</a>.
-    </p>
+        <p>
+            Curious about how it works? For detailed insights into the prompts, system instructions, and implementation, visit the 
+            <a href="https://github.com/SPL1TSY/artefactintelligence" target="_blank">GitHub repository</a>.
+        </p>
+        <p>
+            Want to read the Master's thesis? The link will be updated here when the master's thesis is delivered. (Right now it leads to GitHub page)
+            <a href="https://github.com/SPL1TSY/artefactintelligence" target="_blank">Read it here!</a>
+        </p>
 
-    <button onclick="renderQuiz()" class="nav-button">Explore Proof-of-Concept</button>
-</div>
-`;
+        <button onclick="renderQuiz()" class="nav-button">Explore Proof-of-Concept</button>
+    </div>
+    `;
         }
-
-
-        function submitParticipantId() {
-            const inputField = document.getElementById("participant-input");
-            participantId = inputField.value.trim();
-
-            if (!participantId) {
-                alert("Please enter a valid Participant ID.");
-                return;
-            }
-
-            console.log(`✅ Participant ID set: ${participantId}`); // Log the ID for debugging
-            renderQuiz();  // Proceed to the quiz
-        }
-
 
         function renderQuiz() {
             let quizContainer = document.getElementById("quiz-container");
@@ -153,13 +139,14 @@
 
             quizContainer.innerHTML = `
     <div class="card">
-        <h1 id="quiz-title">Welcome to a Museum!</h1>
-        <h3 id="pleaseAnswerQuestionsText">Please Answer The Following Questions to Get Profiled</h3>
+        <h1 id="quiz-title">Welcome to the Museum! 🏛️ </h1>
+        <h3 id="pleaseAnswerQuestionsText">
+        Please take a moment to answer a few questions so we can personalize your museum experience ✨
+    </p> </h3>
     </div>
     <div id="quiz"></div>
     <h3 id="result"></h3>
 `;
-
 
             renderQuestion(0); // Start the quiz with the first question
         }
@@ -169,7 +156,7 @@
             quizDiv.innerHTML = ""; // Clear previous question
 
             if (questionIndex >= questions.length) {
-                assignProfile(); // Skip final message, go straight to artefacts
+                assignProfile();
                 return;
             }
 
@@ -258,6 +245,7 @@
             showArtefacts(assignedProfile); // Skip final message and go straight to artefacts
         }
 
+
         function clearSelections() {
             userResponses = {}; // Clear all stored responses
             deliveryPreference = "Text-Based"; // Reset delivery preference to default
@@ -318,10 +306,11 @@
 
         <!-- Sticky Audio Controls at the Bottom (Hidden Initially) -->
         <div id="sticky-audio-controls" class="sticky-audio-controls hidden">
-            <p id="audio-loading" class="loading" style="display: none;">🔊 The narrator is getting ready...</p>
-            <button id="playPauseButton" onclick="toggleAudio()" class="audio-button" style="display: none;">🔊 Listen To Narration</button>
-            <button id="moreInfoButton" onclick="requestMoreInfo('${artefact}', '${profile}')" class="audio-button" style="display: none;">📜 Tell Me More...</button>
-        </div>
+    <button id="toggle-controls" onclick="toggleStickyControls()">⬇️</button>
+    <p id="audio-loading" class="loading" style="display: none;">🔊 The narrator is getting ready...</p>
+    <button id="playPauseButton" onclick="toggleAudio()" class="audio-button" style="display: none;">🔊 Listen To Narration</button>
+    <button id="moreInfoButton" onclick="requestMoreInfo('${artefact}', '${profile}')" class="audio-button" style="display: none;">📜 Tell Me More...</button>
+</div>
     `;
 
             fetchOpenAITTS(artefact, profile);
@@ -338,10 +327,10 @@
             document.getElementById("moreInfoButton").style.display = "none";
             document.getElementById("sticky-audio-controls").classList.add("hidden");
 
-            fetch("https://artefactintelligence.hurtic.net/fetch-description", {
+            fetch("http://artefactintelligence.hurtic.net/fetch-description", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ artefact, originalDescription, profile }) // Removed participantId
+                body: JSON.stringify({ artefact, originalDescription, profile, threadId: currentThreadId }),
             })
                 .then(response => response.json())
                 .then(data => {
@@ -355,6 +344,13 @@
                         document.getElementById("artefact-description").innerText = data.response;
                     }
 
+                    // Store threadId for future use
+                    if (data.threadId) {
+                        currentThreadId = data.threadId;
+                        console.log(`✅ Thread ID set to: ${currentThreadId}`);
+                    }
+
+                    // Show sticky controls after content is ready
                     setTimeout(() => {
                         document.getElementById("sticky-audio-controls").classList.remove("hidden");
                         document.getElementById("sticky-audio-controls").classList.add("visible");
@@ -382,41 +378,45 @@
                 });
         }
 
-
         function requestMoreInfo(artefact, profile) {
             if (!artefact || !profile) {
                 console.error("❌ Missing required fields: artefact or profile");
                 return;
             }
 
+            // Stop any ongoing audio
             if (audio) {
                 audio.pause();
                 audio.currentTime = 0;
                 audio = null;
             }
 
+            // Hide sticky controls while fetching data
             document.getElementById("sticky-audio-controls").classList.remove("visible");
             document.getElementById("sticky-audio-controls").classList.add("hidden");
 
+            // Get button elements
             const playButton = document.getElementById("playPauseButton");
             const moreInfoButton = document.getElementById("moreInfoButton");
             const loadingIndicator = document.getElementById("audio-loading");
 
+            // Hide all buttons immediately
             playButton.style.display = "none";
             moreInfoButton.style.display = "none";
             loadingIndicator.style.display = "none";
 
             document.getElementById("artefact-description").innerHTML = `<span class="loading">🔄 Getting more details...</span>`;
 
-            fetch("https://artefactintelligence.hurtic.net/fetch-more-info", {
+            fetch("http://artefactintelligence.hurtic.net/fetch-more-info", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ artefact, profile }) // Removed participantId
+                body: JSON.stringify({ artefact, profile, threadId: currentThreadId }),
             })
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById("artefact-description").innerText = data.response;
 
+                    // Re-show sticky controls after content loads
                     setTimeout(() => {
                         document.getElementById("sticky-audio-controls").classList.remove("hidden");
                         document.getElementById("sticky-audio-controls").classList.add("visible");
@@ -441,13 +441,11 @@
                 });
         }
 
-
-
         // Function to request TTS from server and buttons when loaded
         function requestTTS(text, isFromMoreInfo = false) {
             console.log(`🟡 Sending TTS request (More Info: ${isFromMoreInfo})...`);
 
-            fetch("https://artefactintelligence.hurtic.net/fetch-tts", {
+            fetch("http://artefactintelligence.hurtic.net/fetch-tts", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ text }),
@@ -519,7 +517,7 @@
 
         async function playTTS(text) {
             try {
-                let audioResponse = await fetch("https://artefactintelligence.hurtic.net/fetch-tts", {
+                let audioResponse = await fetch('BASE_URL/fetch-tts', {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ text }),
@@ -574,6 +572,22 @@
             }
         }
 
+        function toggleStickyControls() {
+            const stickyControls = document.getElementById('sticky-audio-controls');
+            const toggleButton = document.getElementById('toggle-controls');
+
+            if (controlsExpanded) {
+                // Collapse sticky controls
+                stickyControls.classList.add('collapsed');
+                toggleButton.innerText = '⬆️';  // Change to up arrow
+            } else {
+                // Expand sticky controls
+                stickyControls.classList.remove('collapsed');
+                toggleButton.innerText = '⬇️';  // Change to down arrow
+            }
+
+            controlsExpanded = !controlsExpanded;
+        }
 
         function renderPreferences() {
             document.getElementById("quiz-container").innerHTML = `
