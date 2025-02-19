@@ -405,7 +405,7 @@
 
             document.getElementById("artefact-description").innerHTML = `<span class="loading">🔄 Getting more details...</span>`;
 
-            fetch("http://artefactintelligence.hurtic.net/fetch-more-info", {
+            fetch("https://artefactintelligence.hurtic.net/fetch-more-info", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ artefact, profile, threadId: currentThreadId }),
@@ -443,7 +443,7 @@
         function requestTTS(text, isFromMoreInfo = false) {
             console.log(`🟡 Sending TTS request (More Info: ${isFromMoreInfo})...`);
 
-            fetch("http://artefactintelligence.hurtic.net/fetch-tts", {
+            fetch("https://artefactintelligence.hurtic.net/fetch-tts", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ text }),
@@ -509,7 +509,7 @@
                 .catch(error => {
                     console.error("❌ Error fetching TTS:", error);
                     document.getElementById("audio-loading").style.display = "none";
-                    alert("Audio failed to load. Please try again.");
+                    console.error("Audio failed to load. Please try again.");
                 });
         }
 
