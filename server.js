@@ -19,7 +19,7 @@ app.use(cors());
 
 /* Comment out this whole "app.use" part out if you want to run the app locally (and replace all urls in front of /fetch in Index.html), and then un-comment the "app.use(cors());" above it. */
 app.use(cors({
-    origin: "https://artefactintelligencestudy.hurtic.net",  // 🔄 Replace url with your frontend URL
+    origin: "https://artefactintelligence.hurtic.net",  // 🔄 Replace url with your frontend URL
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
