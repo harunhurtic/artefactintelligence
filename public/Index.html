@@ -171,7 +171,7 @@
             nextButtonCard.style.display = "none"; // Hidden until an answer is selected
 
             let nextButton = document.createElement("button");
-            nextButton.className = "nav-button";
+            nextButton.className = "next-button";
             nextButton.innerText = "Next Question";
             nextButton.onclick = () => renderQuestion(questionIndex + 1);
             nextButtonCard.appendChild(nextButton);
