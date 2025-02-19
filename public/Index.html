@@ -102,16 +102,29 @@
 
             quizContainer.innerHTML = `
     <div class="artefacts-container">
-        <h1>Welcome to the Master's Thesis Proof-of-Concept: <em>Artefact Intelligence</em>!</h1>
-        <p>
-            This proof-of-concept demonstrates how AI can adapt artefact descriptions in museums to better suit profiled visitors. 
-            Explore how dynamic, tailored content can enhance museum experiences.
-        </p>
-        <p>
-            For more details and usage instructions, visit the <a href="https://github.com/SPL1TSY/artefactintelligence" target="https://github.com/SPL1TSY/artefactintelligence">GitHub repository</a>.
-        </p>
-        <button onclick="renderQuiz()" class="nav-button">Start Exploring</button>
-    </div>
+    <h1>Welcome to the Master's Thesis: <em>Artefact Intelligence</em> Proof-of-Concept!</h1>
+    
+    <p>
+        This proof-of-concept showcases how AI can personalize artefact descriptions in museums to better engage profiled visitors. 
+        Discover how tailored, AI-driven content can transform museum experiences 🏛️✨.
+    </p>
+
+    <p>
+        This app utilizes OpenAI's Assistants API (v2). The connected assistant runs on GPT-4o-mini, dynamically adapting content based on Falk's five visitor profiles. 
+        If the adaptations fail, it may be due to empty tokens or significant changes in OpenAI's API.
+    </p>
+
+    <p>
+        Curious about how it works? For detailed insights into the prompts, system instructions, and implementation, visit the 
+        <a href="https://github.com/SPL1TSY/artefactintelligence" target="_blank">GitHub repository</a>.
+    </p>
+     <p>
+        Want to read the Master's thesis? The link will be updated here when the master's thesis is delivered. (Right now it leads to GitHub page)
+        <a href="https://github.com/SPL1TSY/artefactintelligence" target="_blank">Read it here!</a>.
+    </p>
+
+    <button onclick="renderQuiz()" class="nav-button">Explore Proof-of-Concept</button>
+</div>
 `;
         }
 
@@ -225,8 +238,6 @@
             nextButtonCard.style.display = "block";
         }
 
-
-
         function checkCompletion() {
             if (Object.keys(userResponses).length === questions.length) {
                 assignProfile();
@@ -246,7 +257,6 @@
 
             showArtefacts(assignedProfile); // Skip final message and go straight to artefacts
         }
-
 
         function clearSelections() {
             userResponses = {}; // Clear all stored responses
