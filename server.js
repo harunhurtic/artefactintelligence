@@ -374,6 +374,9 @@ async function fetchTTSWithRetry(text, retries = 3) {
     }
 }
 
+/* When enabling these two endpoints, the first one will display the stored threads in a .json format from the Assistants API and 
+the second endpoint will export them as a .json file.  
+
 app.get("/fetch-stored-threads", async (req, res) => {
     try {
         const threads = await Thread.find({}); // Fetch all stored threads from MongoDB
@@ -399,7 +402,7 @@ app.get("/export-threads", async (req, res) => {
     }
 });
 
-
+*/
 console.log("🔑 OpenAI API Key:", process.env.OPENAI_API_KEY ? "Loaded" : "MISSING");
 console.log("🤖 Assistant ID:", process.env.ASSISTANT_ID ? "Loaded" : "MISSING");
 
