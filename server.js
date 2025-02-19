@@ -228,7 +228,7 @@ app.post("/fetch-more-info", async (req, res) => {
             return res.status(400).json({ error: "No existing thread found." });
         }
 
-        let prompt = `The visitor with the "${profile}" profile wants to learn more about the "${artefact}" artefact. Provide additional insights.`;
+        let prompt = `The visitor with the "${profile}" profile wants to learn more about the "${artefact}" artefact. Follow your system instructions while only providing additional information that you previously haven't provided. If there’s not much info left to provide, explain that to the visitor.`;
 
         thread.messages.push({
             role: "user",
