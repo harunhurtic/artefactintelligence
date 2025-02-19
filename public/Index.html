@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lillehammer Museum</title>
+    <title>Artefact Intelligence Master's Thesis - Proof-of-Concept</title>
     <link rel="stylesheet" href="styling.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -19,8 +19,8 @@
         let userResponses = {};
         let deliveryPreference = "Text-Based";
         let audio = null;
-        let participantId = "";  // Store participant ID
         let audioLoadTimeout = null;  // Global timeout tracker
+        let currentThreadId = null; // Global variable to store threadId
         let controlsExpanded = true;  // Track expand/collapse state
 
         const questions = [
@@ -102,26 +102,31 @@
             }
 
             quizContainer.innerHTML = `
-        <div class="artefacts-container">
-            <h1>Welcome to Lillehammer Museum 🏛️ </h1>
-            <h3>Enter the Participant ID to continue</h3>
-            <input type="text" id="participant-input" placeholder="Enter Participant ID" style="font-size: 1.2em; padding: 10px; margin: 10px;">
-            <button onclick="submitParticipantId()" class="nav-button">Start</button>
-        </div>
+    <div class="artefacts-container">
+        <h1>Welcome to the Master's Thesis: <em>Artefact Intelligence</em> Proof-of-Concept!</h1>
+        
+        <p>
+            This proof-of-concept showcases how AI can personalize artefact descriptions in museums to better engage profiled visitors. 
+            Discover how tailored, AI-driven content can transform museum experiences 🏛️✨
+        </p>
+
+        <p>
+            This app uses OpenAI's Assistants API (v2). The connected assistant runs on GPT-4o-mini, dynamically adapting content based on Falk's five visitor profiles. 
+            If the adaptations fail, it may be due to empty tokens or significant changes in OpenAI's API.
+        </p>
+
+        <p>
+            Curious about how it works? For detailed insights into the prompts, system instructions, and implementation, visit the 
+            <a href="https://github.com/SPL1TSY/artefactintelligence" target="_blank">GitHub repository</a>.
+        </p>
+        <p>
+            Want to read the Master's thesis? The link will be updated here when the master's thesis is delivered. (Right now it leads to GitHub page)
+            <a href="https://github.com/SPL1TSY/artefactintelligence" target="_blank">Read it here!</a>
+        </p>
+
+        <button onclick="renderQuiz()" class="nav-button">Explore Proof-of-Concept</button>
+    </div>
     `;
-        }
-
-        function submitParticipantId() {
-            const inputField = document.getElementById("participant-input");
-            participantId = inputField.value.trim();
-
-            if (!participantId) {
-                alert("Please enter a valid Participant ID.");
-                return;
-            }
-
-            console.log(`✅ Participant ID set: ${participantId}`); // Log the ID for debugging
-            renderQuiz();  // Proceed to the quiz
         }
 
         function renderQuiz() {
@@ -134,7 +139,7 @@
 
             quizContainer.innerHTML = `
     <div class="card">
-        <h1 id="quiz-title">Welcome to Lillehammer Museum 🏛️ </h1>
+        <h1 id="quiz-title">Welcome to the Museum! 🏛️ </h1>
         <h3 id="pleaseAnswerQuestionsText">Please take a moment to answer a few questions so we can personalize your museum experience ✨</h3>
     </div>
     <div id="quiz"></div>
@@ -149,7 +154,7 @@
             quizDiv.innerHTML = ""; // Clear previous question
 
             if (questionIndex >= questions.length) {
-                assignProfile(); // Skip final message, go straight to artefacts
+                assignProfile();
                 return;
             }
 
@@ -260,7 +265,7 @@
             document.getElementById("quiz-container").innerHTML = `
         <!-- Title/Profile Section -->
         <div class="artefacts-container">
-            <h1>Lillehammer Museum - Artefacts</h1>
+            <h1>Museum - Artefacts</h1>
             <p><strong>Assigned Profile:</strong> ${profile}</p>
             <p><strong>Delivery:</strong> ${deliveryMode}</p>
             <button onclick="renderQuiz()" class="nav-button">🔄 Change Preferences</button>
@@ -304,7 +309,6 @@
     <button id="playPauseButton" onclick="toggleAudio()" class="audio-button" style="display: none;">🔊 Listen To Narration</button>
     <button id="moreInfoButton" onclick="requestMoreInfo('${artefact}', '${profile}')" class="audio-button" style="display: none;">📜 Tell Me More...</button>
 </div>
-
     `;
 
             fetchOpenAITTS(artefact, profile);
@@ -321,10 +325,10 @@
             document.getElementById("moreInfoButton").style.display = "none";
             document.getElementById("sticky-audio-controls").classList.add("hidden");
 
-            fetch("https://artefactintelligencestudy.hurtic.net/fetch-description", {
+            fetch("https://artefactintelligence.hurtic.net/fetch-description", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ artefact, originalDescription, profile, participantId }),
+                body: JSON.stringify({ artefact, originalDescription, profile, threadId: currentThreadId }),
             })
                 .then(response => response.json())
                 .then(data => {
@@ -336,6 +340,12 @@
                             `The adaptation failed. However, here's the original artefact description:\n\n${originalDescription}`;
                     } else {
                         document.getElementById("artefact-description").innerText = data.response;
+                    }
+
+                    // Store threadId for future use
+                    if (data.threadId) {
+                        currentThreadId = data.threadId;
+                        console.log(`✅ Thread ID set to: ${currentThreadId}`);
                     }
 
                     // Show sticky controls after content is ready
@@ -367,8 +377,8 @@
         }
 
         function requestMoreInfo(artefact, profile) {
-            if (!artefact || !profile || !participantId) {
-                console.error("❌ Missing required fields: artefact, profile, or participantId");
+            if (!artefact || !profile) {
+                console.error("❌ Missing required fields: artefact or profile");
                 return;
             }
 
@@ -395,10 +405,10 @@
 
             document.getElementById("artefact-description").innerHTML = `<span class="loading">🔄 Getting more details...</span>`;
 
-            fetch("https://artefactintelligencestudy.hurtic.net/fetch-more-info", {
+            fetch("https://artefactintelligence.hurtic.net/fetch-more-info", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ artefact, profile, participantId }),
+                body: JSON.stringify({ artefact, profile, threadId: currentThreadId }),
             })
                 .then(response => response.json())
                 .then(data => {
@@ -429,12 +439,11 @@
                 });
         }
 
-
         // Function to request TTS from server and buttons when loaded
         function requestTTS(text, isFromMoreInfo = false) {
             console.log(`🟡 Sending TTS request (More Info: ${isFromMoreInfo})...`);
 
-            fetch("https://artefactintelligencestudy.hurtic.net/fetch-tts", {
+            fetch("https://artefactintelligence.hurtic.net/fetch-tts", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ text }),
@@ -500,13 +509,13 @@
                 .catch(error => {
                     console.error("❌ Error fetching TTS:", error);
                     document.getElementById("audio-loading").style.display = "none";
-                    alert("Audio failed to load. Please try again.");
+                    console.error("Audio failed to load. Please try again.");
                 });
         }
 
         async function playTTS(text) {
             try {
-                let audioResponse = await fetch('BASE_URL/fetch-tts', {
+                let audioResponse = await fetch("https://artefactintelligence.hurtic.net/fetch-tts", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ text }),
@@ -577,7 +586,6 @@
 
             controlsExpanded = !controlsExpanded;
         }
-
 
         function renderPreferences() {
             document.getElementById("quiz-container").innerHTML = `
