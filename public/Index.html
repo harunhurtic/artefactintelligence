@@ -325,7 +325,7 @@
             document.getElementById("moreInfoButton").style.display = "none";
             document.getElementById("sticky-audio-controls").classList.add("hidden");
 
-            fetch("http://artefactintelligence.hurtic.net/fetch-description", {
+            fetch("https://artefactintelligence.hurtic.net/fetch-description", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ artefact, originalDescription, profile, threadId: currentThreadId }),
