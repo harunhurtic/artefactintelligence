@@ -121,7 +121,7 @@ app.post("/fetch-description", async (req, res) => {
             console.log(`✅ Created Thread ID: ${thread.threadId}`);
         }
 
-        let prompt = `Adapt the following artefact description and make it more engaging for a museum visitor with the ${profile} profile while preserving factual accuracy. Artefact: ${artefact}. Description: ${originalDescription}`;
+        let prompt = `Adapt the following artefact description and make it more engaging for a museum visitor with the "${profile}" profile while preserving factual accuracy. Ensure that the adaptation aligns with the preferences, interests, and motivations of their profile, without explicitly mentioning their profile or adding unnecessary details.\n\nArtefact: "${artefact}".\nDescription: "${originalDescription}"`;
 
         const messageResponse = await fetch(`https://api.openai.com/v1/threads/${thread.threadId}/messages`, {
             method: "POST",
