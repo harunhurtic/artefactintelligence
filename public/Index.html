@@ -106,13 +106,12 @@
         <h1>Welcome to the Master's Thesis: <em>Artefact Intelligence</em> Proof-of-Concept!</h1>
         
         <p>
-            This proof-of-concept showcases how AI can personalize artefact descriptions in museums to better engage profiled visitors. 
-            Discover how tailored, AI-driven content can transform museum experiences 🏛️✨
+            This proof-of-concept demonstrates how AI can personalize artefact descriptions in museums by dynamically adapting content based on visitor profiles, categorized through the following questionnaire using Falk's five visitor profiles. Discover how adapted, AI-driven descriptions can personalize museum experiences 🏛️✨
         </p>
 
         <p>
-            This app uses OpenAI's Assistants API (v2). The connected assistant runs on GPT-4o-mini, dynamically adapting content based on Falk's five visitor profiles. 
-            If the adaptations fail, it may be due to empty tokens or significant changes in OpenAI's API.
+            This web-app uses OpenAI's Assistants API (v2). The connected assistant runs on GPT-4o-mini.
+            If the adaptations fail, it could be due to an empty API token balance (as this is a demo) or significant changes to OpenAI's API.
         </p>
 
         <p>
@@ -120,16 +119,32 @@
             <a href="https://github.com/SPL1TSY/artefactintelligence" target="_blank">GitHub repository</a>.
         </p>
         <p>
-            Want to read the Master's thesis? The link will be updated here when the master's thesis is delivered. (Right now it leads to GitHub page)
-            <a href="https://github.com/SPL1TSY/artefactintelligence" target="_blank">Read it here!</a>
+            Do you want to read the Master's thesis? <a href="https://github.com/SPL1TSY/artefactintelligence" target="_blank">Read it here!</a>
         </p>
-
-        <button onclick="renderQuiz()" class="nav-button">Explore Proof-of-Concept</button>
+        <button onclick="renderWelcomeScreen()" class="nav-button">Explore Proof-of-Concept</button>
     </div>
     `;
         }
 
-        function renderQuiz() {
+        function renderWelcomeScreen() {
+            let quizContainer = document.getElementById("quiz-container");
+
+            if (!quizContainer) {
+                console.error("❌ Error: quiz-container not found!");
+                return;
+            }
+
+            // Initial Welcome Screen with Start Button
+            quizContainer.innerHTML = `
+    <div class="card">
+        <h1 id="quiz-title">Welcome to the Museum! 🏛️ </h1>
+        <h3 id="pleaseAnswerQuestionsText">Please take a moment to answer a few questions so we can personalize your museum experience ✨</h3>
+        <button onclick="renderQuestionnaire()" class="nav-button">Start</button>
+    </div>
+    `;
+        }
+
+        function renderQuestionnaire() {
             let quizContainer = document.getElementById("quiz-container");
 
             if (!quizContainer) {
@@ -138,17 +153,12 @@
             }
 
             quizContainer.innerHTML = `
-    <div class="card">
-        <h1 id="quiz-title">Welcome to the Museum! 🏛️ </h1>
-        <h3 id="pleaseAnswerQuestionsText">Please take a moment to answer a few questions so we can personalize your museum experience ✨</h3>
-    </div>
     <div id="quiz"></div>
     <h3 id="result"></h3>
-`;
+    `;
 
-            renderQuestion(0); // Start the quiz with the first question
+            renderQuestion(0); // Start the questionnaire
         }
-
         function renderQuestion(questionIndex) {
             const quizDiv = document.getElementById("quiz");
             quizDiv.innerHTML = ""; // Clear previous question
@@ -161,44 +171,67 @@
             const currentQuestion = questions[questionIndex];
             const questionDiv = document.createElement("div");
             questionDiv.className = "card";
-            questionDiv.innerHTML = `<p>${currentQuestion.text}</p>`;
+            questionDiv.innerHTML = `<h3>${currentQuestion.text}</h3>`;
 
             const optionsContainer = document.createElement("div");
             optionsContainer.className = "options-container";
 
+            // Add Previous Button if not the first question
+            if (questionIndex > 0) {
+                let prevButtonCard = document.createElement("div");
+                prevButtonCard.className = "card";
+
+                let prevButton = document.createElement("button");
+                prevButton.className = "nextprev-button";
+                prevButton.innerText = "⬅️ Previous Question";
+                prevButton.onclick = () => renderQuestion(questionIndex - 1);
+
+                prevButtonCard.appendChild(prevButton);
+                quizDiv.appendChild(prevButtonCard);
+            }
+
+            // Next Button (hidden by default until an answer is selected)
             let nextButtonCard = document.createElement("div");
-            nextButtonCard.className = "card"; // Separate card for the "Next Question" button
-            nextButtonCard.style.display = "none"; // Hidden until an answer is selected
+            nextButtonCard.className = "card";
+            nextButtonCard.style.display = "none";
 
             let nextButton = document.createElement("button");
-            nextButton.className = "next-button";
-            nextButton.innerText = "Next Question";
+            nextButton.className = "nextprev-button";
+            nextButton.innerText = "Next Question ➡️";
             nextButton.onclick = () => renderQuestion(questionIndex + 1);
             nextButtonCard.appendChild(nextButton);
 
+            // Render answer options and highlight selected answers
             currentQuestion.options.forEach((option, optIndex) => {
                 const button = document.createElement("button");
                 button.className = "option-button";
                 button.innerText = option.answer;
-                button.onclick = () => selectAnswer(questionIndex, optIndex, button, nextButtonCard);
+
+                // Highlight previously selected answer
+                if (userResponses[questionIndex] && userResponses[questionIndex].answer === option.answer) {
+                    button.classList.add("selected");
+                    nextButtonCard.style.display = "block"; // Show Next if already answered
+                }
+
+                button.onclick = () => {
+                    selectAnswer(questionIndex, optIndex, button, nextButtonCard);
+                };
 
                 optionsContainer.appendChild(button);
             });
 
             questionDiv.appendChild(optionsContainer);
             quizDiv.appendChild(questionDiv);
-            quizDiv.appendChild(nextButtonCard); // Add the next button card (hidden initially)
+            quizDiv.appendChild(nextButtonCard);
         }
 
         function selectAnswer(questionIndex, optionIndex, selectedButton, nextButtonCard) {
             let selectedOption = questions[questionIndex].options[optionIndex];
 
-            // Toggle selection: If already selected, remove the answer
-            if (userResponses[questionIndex] === selectedOption) {
-                delete userResponses[questionIndex]; // Remove answer
-                selectedButton.classList.remove("selected"); // Remove highlight
-
-                // Hide the "Next Question" card if no answer is selected
+            // Toggle selection/deselection
+            if (userResponses[questionIndex] && userResponses[questionIndex].answer === selectedOption.answer) {
+                delete userResponses[questionIndex];
+                selectedButton.classList.remove("selected");
                 nextButtonCard.style.display = "none";
                 return;
             }
@@ -212,16 +245,17 @@
                 console.log(`✅ Delivery Preference Updated: ${deliveryPreference}`);
             }
 
-            // Remove "selected" class from all buttons in this question
-            const optionButtons = document.querySelectorAll(".option-button");
+            // Deselect other options
+            const optionButtons = selectedButton.parentElement.querySelectorAll(".option-button");
             optionButtons.forEach(button => button.classList.remove("selected"));
 
-            // Add "selected" class to the clicked button
+            // Highlight selected button
             selectedButton.classList.add("selected");
 
-            // Show the "Next Question" card after selecting an answer
+            // Show Next button
             nextButtonCard.style.display = "block";
         }
+
 
         function checkCompletion() {
             if (Object.keys(userResponses).length === questions.length) {

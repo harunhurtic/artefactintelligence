@@ -79,7 +79,7 @@ body {
     transition: background 0.3s ease-in-out;
 }
 
-.next-button {
+.nextprev-button {
     display: block;
     width: 100%;
     background-color: #18004d;
@@ -98,7 +98,7 @@ body {
 .nav-button:hover,
 .audio-button:hover,
 .back-button:hover,
-.next-button:hover {
+.nextprev-button:hover {
     background-color: #4a2f7a;
     transform: scale(1.05);
 }
