@@ -13,11 +13,10 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-/* Un-comment out this part if you want to run the app locally
-app.use(cors()); 
-*/
+/* Un-comment out this part if you want to run the app locally*/
+/* app.use(cors());*/
 
-/* Comment out this whole "app.use" part out if you want to run the app locally (and replace all urls in front of /fetch in Index.html), and then un-comment the "app.use(cors());" above it. */
+/*Comment out this whole "app.use" part out if you want to run the app locally (and replace all urls in front of /fetch in Index.html), and then un-comment the "app.use(cors());" above it. */
 app.use(cors({
     origin: "https://artefactintelligence.hurtic.net",  // 🔄 Replace url with your frontend URL
     methods: ["GET", "POST"],
@@ -393,3 +392,5 @@ console.log("🤖 Assistant ID:", process.env.ASSISTANT_ID ? "Loaded" : "MISSING
 // Start server
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+
+/* Developed by Harun Hurtic as part of his Master's Thesis at the Norwegian University of Science and Technology (NTNU) */
