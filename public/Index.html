@@ -88,9 +88,9 @@
         ];
 
         const artefactDescriptions = {
-            "Kinne": "Core staff with pinewood resin. The handle is grained, has two ears, and six black-painted hoops (wooden bands). The pinewood resin is cross-shaped at one end. The cross is painted brown and black. At the other end of the shaft and beneath the base, there is a carved cross.",
-            "Handwritten Cookbook": "Handwritten cookbook with a thick cardboard cover. Spine made of thin leather, very cracked. In addition to handwritten recipes, there are some recipes from newspapers and magazines.",
-            "Tinbox with a Hinged Lid": "Tinbox with a hinged lid. Rectangular shape with rounded corners. Green base color, with yellow and red print. There appear to be remnants of tape that once wrapped around the transition from the box to the lid."
+            "Christine Storm Munchs Cookbook": "Glazed Earthenware.<br><br>The rococo style products made by the Herrebøe glazed earthenware factory in Halden were very modern in their day. Decorated with blues from the cobolt mines in Modum, the terrine would have stood out on the table at Bø Farm in Nord-Fran. Printed cookbooks were rare, but many made their own. Christine Storm Munch (1746-1825), the person’s wife in Vågå, collected recipe and had them bound as a book. It includes turtle soup and ‘Huskom Snusk’.",
+            "Apostle Irons": "Cakes.<br><br>Wafers are the most distinguished of celebratory cakes. The term ‘wafers’ is derived from ‘communion wafers’, which are used in the Christian Eucharist. Apostle irons were popular in the 1700s. They were made in Nord-Gudbrandsdalen near the ironworks in Lesja. The row of apostles may have been inspired by a pewter dish from the 1600s made in Nuremberg, Germany. Some wafers have heraldic elements from the British and Danish-Norwegian national coats of arms. Local variants include the British unicorn and lion together with the Norwegian national coat of arms.",
+            "Spice Box": "Tinbox with a hinged lid. Rectangular shape with rounded corners. Green base color, with yellow and red print. There appear to be remnants of tape that once wrapped around the transition from the box to the lid."
         };
 
         function renderParticipantScreen() {
@@ -106,7 +106,7 @@
         <h1>Welcome to the Master's Thesis: <em>Artefact Intelligence</em> Proof-of-Concept!</h1>
         
         <p>
-            This proof-of-concept demonstrates how AI can personalize artefact descriptions in museums by dynamically adapting content based on visitor profiles, categorized through the following questionnaire using Falk's five visitor profiles. Discover how adapted, AI-driven descriptions can personalize museum experiences 🏛️✨
+            This proof-of-concept demonstrates how AI can personalize artefact descriptions in museums by dynamically adapting content based on visitor profiles, categorized through the following questionnaire using Falk's five visitor profiles. It uses three artefacts (with permission) from Lillehammer Museum for demonstrating how adapted, AI-driven descriptions can personalize museum experiences 🏛️✨
         </p>
 
         <p>
@@ -302,19 +302,28 @@
             <h1>Museum - Artefacts</h1>
             <p><strong>Assigned Profile:</strong> ${profile}</p>
             <p><strong>Delivery:</strong> ${deliveryMode}</p>
-            <button onclick="renderQuiz()" class="nav-button">🔄 Change Preferences</button>
+            <button onclick="renderQuestionnaire()" class="nav-button">🔄 Change Preferences</button>
         </div>
 
         <!-- Artefacts Section -->
         <div class="artefacts-container">
-            <h2>Select an Artefact:</h2>
-            <div class="artefact-container">
-                <button class="artefact-button" onclick='showArtefactDetails("Kinne", "${profile}")'>🧈 Kinne</button>
-                <button class="artefact-button" onclick='showArtefactDetails("Handwritten Cookbook", "${profile}")'>📖 Handwritten Cookbook</button>
-                <button class="artefact-button" onclick='showArtefactDetails("Tinbox with a Hinged Lid", "${profile}")'> 📦 Tinbox with a Hinged Lid</button>
+        <h2>Select an Artefact:</h2>
+        <div class="artefact-container">
+            <div class="card artefact-card" onclick='showArtefactDetails("Christine Storm Munchs Cookbook", "${profile}")'>
+                <img src="artefacts/cookbook.webp" alt="Christine Storm Munchs Cookbook" class="artefact-image">
+                <h3>Christine Storm Munchs Cookbook</h3>
+            </div>
+            <div class="card artefact-card" onclick='showArtefactDetails("Apostle Irons", "${profile}")'>
+                <img src="artefacts/apostle_irons.webp" alt="Apostle Irons" class="artefact-image">
+                <h3>Apostle Irons</h3>
+            </div>
+            <div class="card artefact-card" onclick='showArtefactDetails("Spice Box", "${profile}")'>
+                <img src="artefacts/spice_box.webp" alt="Spice Box" class="artefact-image">
+                <h3>Spice Box</h3>
             </div>
         </div>
-    `;
+    </div>
+`;
         }
 
         function showArtefactDetails(artefact, profile) {

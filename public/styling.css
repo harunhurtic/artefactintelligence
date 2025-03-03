@@ -132,6 +132,24 @@ body {
     margin-bottom: 15px;
 }
 
+.artefact-card {
+    cursor: pointer;
+    text-align: center;
+    padding: 15px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.artefact-card:hover {
+    transform: scale(1.05);
+}
+
+.artefact-image {
+    width: 100%;
+    max-width: 300px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
 /* Artefact Details Page */
 .artefact-details {
     background: white;
