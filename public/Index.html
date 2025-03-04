@@ -22,6 +22,7 @@
         let audioLoadTimeout = null;  // Global timeout tracker
         let currentThreadId = null; // Global variable to store threadId
         let controlsExpanded = true;  // Track expand/collapse state
+        let currentArtefact = null;
 
         const questions = [
             {
@@ -327,6 +328,22 @@
         }
 
         function showArtefactDetails(artefact, profile) {
+            // Scroll to the top when switching artefacts
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            currentArtefact = artefact;
+
+            // Stop any ongoing TTS request
+            if (window.ttsAbortController) {
+                console.log("⛔ Aborting previous TTS request...");
+                window.ttsAbortController.abort();
+            }
+
+            // Stop any ongoing "Tell Me More" request
+            if (window.moreInfoAbortController) {
+                console.log("⛔ Aborting previous 'Tell Me More' request...");
+                window.moreInfoAbortController.abort();
+            }
+
             // Stop any ongoing audio when switching artefacts
             if (audio) {
                 audio.pause();
@@ -425,6 +442,19 @@
                 return;
             }
 
+            // Abort any previous request if one exists
+            if (window.moreInfoAbortController) {
+                console.log("⛔ Aborting previous 'Tell Me More' request...");
+                window.moreInfoAbortController.abort();
+            }
+
+            // Create a new AbortController for this request
+            window.moreInfoAbortController = new AbortController();
+            const { signal } = window.moreInfoAbortController;
+
+            // Save the currently selected artefact to check later
+            const requestedArtefact = artefact;
+
             // Stop any ongoing audio
             if (audio) {
                 audio.pause();
@@ -452,9 +482,15 @@
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ artefact, profile, threadId: currentThreadId }),
+                signal: signal // Attach signal to allow aborting the request
             })
                 .then(response => response.json())
                 .then(data => {
+                    // Check if the user has navigated away before updating the UI
+                    if (requestedArtefact !== currentArtefact) {
+                        console.log("🔄 User navigated away. Ignoring outdated response.");
+                        return;
+                    }
                     document.getElementById("artefact-description").innerText = data.response;
 
                     // Re-show sticky controls after content loads
