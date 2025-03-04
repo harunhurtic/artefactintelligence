@@ -441,6 +441,9 @@
                 console.error("❌ Missing required fields: artefact or profile");
                 return;
             }
+            if (!currentThreadId) {
+                console.error("⚠️ No threadId found, creating a new thread instead of continuing.");
+            }
 
             // Abort any previous request if one exists
             if (window.moreInfoAbortController) {
