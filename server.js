@@ -227,22 +227,16 @@ app.post("/fetch-more-info", async (req, res) => {
             return res.status(400).json({ error: "No existing thread found." });
         }
 
-        // FIX: Add a proper prompt message
-        let prompt = `The visitor with the "${profile}" profile wants to learn more about the artefact "${artefact}".\n\n
-        Please provide additional, non-redundant information that expands on the artefact. Avoid repeating previous details.`;
+        let prompt = `The visitor with the "${profile}" profile wants to learn more about the "${artefact}" artefact.\n\nPlease provide additional, non-redundant information that expands on the artefact. The new content should remain engaging, accurate, and tailored to the visitor’s profile preferences without explicitly referencing their profile or repeating previous details. If no significant new information is available, offer a subtle acknowledgment of that while maintaining an informative tone.`;
 
-        // FIX: Save "Tell Me More" as a new user message in MongoDB
         thread.messages.push({
             role: "user",
             content: prompt,
             timestamp: new Date()
         });
 
-        await thread.save(); // ✅ This ensures OpenAI sees the new request
+        await thread.save();
 
-        console.log("🛠️ Stored 'Tell Me More' request:", prompt);
-
-        // Now, send the request to OpenAI
         const messageResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
             method: "POST",
             headers: OPENAI_HEADERS,
@@ -280,7 +274,7 @@ app.post("/fetch-more-info", async (req, res) => {
                 });
 
                 const messagesData = await messagesResponse.json();
-                const assistantMessage = messagesData.data[messagesData.data.length - 1]; // ✅ Get the latest assistant response
+                const assistantMessage = messagesData.data.find(msg => msg.role === "assistant");
 
                 responseContent = assistantMessage?.content[0]?.text?.value || "No additional information found.";
 
@@ -302,7 +296,6 @@ app.post("/fetch-more-info", async (req, res) => {
         res.status(500).json({ response: "Failed to fetch additional information." });
     }
 });
-
 
 // API route for fetching TTS audio
 app.post("/fetch-tts", async (req, res) => {
