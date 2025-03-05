@@ -6,7 +6,7 @@ import mongoose from "mongoose"
 import favicon from "serve-favicon";
 import path from "path";
 import { fileURLToPath } from "url"; // Needed for ES Modules
-import fs from "fs";
+/*import fs from "fs";*/  // Only enable if 'export' endpoints are enabled
 
 dotenv.config();
 
@@ -83,6 +83,12 @@ app.post("/fetch-description", async (req, res) => {
     if (!artefact || !originalDescription || !profile) {
         console.error("❌ Missing required fields");
         return res.status(400).json({ error: "Missing artefact or profile" });
+    }
+
+    // Ensure the request is for the latest artefact
+    if (req.body.artefact !== artefact) {
+        console.log("🔄 Artefact changed, ignoring outdated request.");
+        return res.status(400).json({ response: "Artefact changed, ignoring outdated request." });
     }
 
     try {
