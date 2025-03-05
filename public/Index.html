@@ -17,7 +17,7 @@
 
     <script>
         let userResponses = {};
-        let deliveryPreference = "Text-Based";
+        let deliveryPreference = "Auditory"; // Change this to Text-based and un-comment the first question below if you want the user's to be able to select delivery mode themselves.
         let audio = null;
         let audioLoadTimeout = null;  // Global timeout tracker
         let currentThreadId = null; // Global variable to store threadId
@@ -25,15 +25,15 @@
         let currentArtefact = null;
 
         const questions = [
-            {
+            /*{
                 text: "How do you best engage with museum content? (1/7)", options: [
                     { answer: "Listening to guides, podcasts, or audio tours.", delivery: "Auditory" },
                     { answer: "Reading text panels, labels, and descriptions.", delivery: "Text-based" }
                 ]
-            },
+            },*/
 
             {
-                text: "How often do you visit museums? (2/7)", options: [
+                text: "How often do you visit museums? (1/6)", options: [
                     { answer: "As often as I can. I love discovering new things.", score: 5, profile: "Explorer" },
                     { answer: "Occasionally, but mostly when I’m bringing someone along.", score: 7, profile: "Facilitator" },
                     { answer: "Regularly, especially when there’s a relevant exhibit to my interests.", score: 4, profile: "Professional/Hobbyist" },
@@ -42,7 +42,7 @@
                 ]
             },
             {
-                text: "What is your main reason for visiting a museum? (3/7)", options: [
+                text: "What is your main reason for visiting a museum? (2/6)", options: [
                     { answer: "To discover and learn something new.", score: 3, profile: "Explorer" },
                     { answer: "To help someone else engage with exhibits and contents.", score: 4, profile: "Facilitator" },
                     { answer: "Because it aligns with my professional/hobby interests.", score: 5, profile: "Professional/Hobbyist" },
@@ -51,7 +51,7 @@
                 ]
             },
             {
-                text: "What’s the first thing you usually do in a museum? (4/7)", options: [
+                text: "What’s the first thing you usually do in a museum? (3/6)", options: [
                     { answer: "Wander and explore whatever catches my attention.", score: 6, profile: "Explorer" },
                     { answer: "Make sure my companions are engaged and having a good time.", score: 3, profile: "Facilitator" },
                     { answer: "Go straight to the exhibits related to my field of interest", score: 4, profile: "Professional/Hobbyist" },
@@ -60,7 +60,7 @@
                 ]
             },
             {
-                text: "What kind of museum exhibit excites you the most? (5/7)", options: [
+                text: "What kind of museum exhibit excites you the most? (4/6)", options: [
                     { answer: "Hands-on, interactive, or unexpected discoveries.", score: 4, profile: "Explorer" },
                     { answer: "Exhibits designed for all ages to enjoy together.", score: 6, profile: "Facilitator" },
                     { answer: "Niche, highly detailed content that aligns with my passion.", score: 7, profile: "Professional/Hobbyist" },
@@ -69,7 +69,7 @@
                 ]
             },
             {
-                text: "What would make a museum visit disappointing for you? (6/7)", options: [
+                text: "What would make a museum visit disappointing for you? (5/6)", options: [
                     { answer: "If there’s nothing new to explore or learn.", score: 7, profile: "Explorer" },
                     { answer: "If my companion(s) didn’t enjoy it.", score: 5, profile: "Facilitator" },
                     { answer: "If the exhibits didn’t go deep enough into the subject.", score: 6, profile: "Professional/Hobbyist" },
@@ -78,7 +78,7 @@
                 ]
             },
             {
-                text: "How do you usually feel after a museum visit? (7/7)", options: [
+                text: "How do you usually feel after a museum visit? (6/6)", options: [
                     { answer: "Excited about what I discovered and eager to learn more.", score: 5, profile: "Explorer" },
                     { answer: "Happy that my group enjoyed it and learned something.", score: 7, profile: "Facilitator" },
                     { answer: "Inspired to apply what I saw to my work or hobbies.", score: 3, profile: "Professional/Hobbyist" },
@@ -473,6 +473,9 @@
             if (!currentThreadId) {
                 console.error("⚠️ No threadId found, creating a new thread instead of continuing.");
             }
+
+            // Get the current artefact description displayed on the page
+            let currentDescription = document.getElementById("artefact-description").innerText.trim();
 
             // Abort any previous request if one exists
             if (window.moreInfoAbortController) {
