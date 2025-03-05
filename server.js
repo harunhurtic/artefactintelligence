@@ -245,7 +245,7 @@ app.post("/fetch-more-info", async (req, res) => {
             return res.status(400).json({ response: "Artefact changed, ignoring outdated request." });
         }
 
-        let prompt = `The visitor with the "${profile}" profile wants to learn more about the "${artefact}" artefact. They have already seen the following description:\n"${currentDescription}"\n\nPlease provide additional, non-redundant information that expands on the artefact. The new content should remain engaging, accurate, and tailored to the visitor’s profile preferences without explicitly referencing their profile or repeating previous details. If no significant new information is available, offer a subtle acknowledgment of that while maintaining an informative tone`;
+        let prompt = `The visitor with the "${profile}" profile wants to learn more about the "${artefact}" artefact.\nProvide additional, non-redundant information that expands on the artefact. The new content should remain engaging, accurate, and tailored to the visitor’s profile preferences without explicitly referencing their profile or repeating previous details. If no significant new information is available, offer a subtle acknowledgment of that while maintaining an informative tone`;
 
         thread.messages.push({
             role: "user",
