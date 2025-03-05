@@ -374,7 +374,6 @@
             fetchOpenAITTS(artefact, profile);
         }
 
-
         function fetchOpenAITTS(artefact, profile) {
             let originalDescription = artefactDescriptions[artefact] || "No description available.";
 
@@ -472,7 +471,6 @@
 
             // Abort any previous request if one exists
             if (window.moreInfoAbortController) {
-                console.log("⛔ Aborting previous 'Tell Me More' request...");
                 window.moreInfoAbortController.abort();
             }
 
@@ -512,7 +510,20 @@
                 body: JSON.stringify({ artefact, profile, threadId: currentThreadId }),
                 signal: signal // Attach signal to allow aborting the request
             })
-                .then(response => response.json())
+                .then(async response => {
+                    // 1) If the server said 400 => “outdated request,” just ignore
+                    if (!response.ok) {
+                        if (response.status === 400) {
+                            console.log("Ignoring outdated 'Tell Me More' request (server returned 400).");
+                            return null; // Don’t parse JSON, don’t show error
+                        }
+                        // Otherwise handle 500 or other errors
+                        const errBody = await response.json();
+                        throw new Error(errBody.response || "Failed to fetch additional information.");
+                    }
+                    // 2) For success (200), parse JSON
+                    return response.json();
+                })
                 .then(data => {
                     // Check if the user has navigated away before updating the UI
                     if (requestedArtefact !== currentArtefact) {
@@ -552,9 +563,7 @@
                         document.getElementById("sticky-audio-controls").classList.add("visible");
                     }, 300);
                 });
-
         }
-
 
         // Helper to detect mobile devices
         function isMobileDevice() {
