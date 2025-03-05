@@ -510,18 +510,17 @@
                 body: JSON.stringify({ artefact, profile, threadId: currentThreadId }),
                 signal: signal // Attach signal to allow aborting the request
             })
+                .then(response => response.json())
                 .then(async response => {
-                    // 1) If the server said 400 => “outdated request,” just ignore
                     if (!response.ok) {
                         if (response.status === 400) {
                             console.log("Ignoring outdated 'Tell Me More' request (server returned 400).");
-                            return null; // Don’t parse JSON, don’t show error
+                            return null;  // do NOT show error, just ignore
                         }
-                        // Otherwise handle 500 or other errors
+                        // For 500 or other errors, parse & throw:
                         const errBody = await response.json();
-                        throw new Error(errBody.response || "Failed to fetch additional information.");
+                        throw new Error(errBody.response || "Failed to fetch additional info.");
                     }
-                    // 2) For success (200), parse JSON
                     return response.json();
                 })
                 .then(data => {
