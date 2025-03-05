@@ -330,6 +330,10 @@
         function showArtefactDetails(artefact, profile) {
             // Scroll to the top when switching artefacts
             window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (currentArtefact !== artefact) {
+                currentThreadId = null;  // Reset the thread ID to force a new one
+            }
             currentArtefact = artefact;
 
             // Stop any ongoing TTS request
