@@ -232,6 +232,18 @@ app.post("/fetch-more-info", async (req, res) => {
             console.error("❌ No existing thread found.");
             return res.status(400).json({ error: "No existing thread found." });
         }
+        console.log("DB artefact:", JSON.stringify(thread.artefact));
+        console.log("Request artefact:", JSON.stringify(artefact));
+
+        // If you only want to check ignoring case and whitespace:
+        const dbArtefact = thread.artefact.trim().toLowerCase();
+        const reqArtefact = artefact.trim().toLowerCase();
+
+        if (dbArtefact !== reqArtefact) {
+            console.log("🔄 Artefact changed, ignoring outdated 'Tell Me More' request.");
+            return res.status(400).json({ response: "Artefact changed, ignoring outdated request." });
+        }
+
         if (thread.artefact !== artefact) {
             return res.status(400).json({ response: "Artefact changed, ignoring outdated request." });
         }
