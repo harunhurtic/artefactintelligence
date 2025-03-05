@@ -510,6 +510,12 @@
                     }
                 })
                 .catch(error => {
+                    // If fetch was aborted, just return without modifying the UI
+                    if (error.name === "AbortError") {
+                        console.log("⚠️ Fetch was aborted. No UI update.");
+                        return;
+                    }
+
                     console.error("❌ Error fetching more details:", error);
                     document.getElementById("artefact-description").innerText = "Failed to fetch additional information.";
                     moreInfoButton.style.display = "block";
@@ -520,6 +526,7 @@
                     }, 300);
                 });
         }
+
 
         // Helper to detect mobile devices
         function isMobileDevice() {
