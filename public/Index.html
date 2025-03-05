@@ -443,6 +443,11 @@
                         console.log("⚠️ Fetch was aborted. No UI update.");
                         return;
                     }
+                    // Add a check to ignore outdated responses if the user has switched artefacts.
+                    if (currentArtefact !== artefact) {
+                        console.log("User navigated away, ignoring outdated response error.");
+                        return;
+                    }
                     console.error("❌ Error fetching description:", error);
                     document.getElementById("loading").style.display = "none";
                     document.getElementById("artefact-description").innerText =
@@ -453,6 +458,7 @@
                     }, 300);
                     document.getElementById("moreInfoButton").style.display = "block";
                 });
+
         }
 
         function requestMoreInfo(artefact, profile) {
@@ -529,21 +535,24 @@
                     }
                 })
                 .catch(error => {
-                    // If fetch was aborted, just return without modifying the UI
                     if (error.name === "AbortError") {
                         console.log("⚠️ Fetch was aborted. No UI update.");
                         return;
                     }
-
+                    // Check if the artefact for which this request was made is still the active one.
+                    if (requestedArtefact !== currentArtefact) {
+                        console.log("User navigated away, ignoring outdated response error.");
+                        return;
+                    }
                     console.error("❌ Error fetching more details:", error);
                     document.getElementById("artefact-description").innerText = "Failed to fetch additional information.";
                     moreInfoButton.style.display = "block";
-
                     setTimeout(() => {
                         document.getElementById("sticky-audio-controls").classList.remove("hidden");
                         document.getElementById("sticky-audio-controls").classList.add("visible");
                     }, 300);
                 });
+
         }
 
 
