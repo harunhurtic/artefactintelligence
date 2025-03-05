@@ -6,7 +6,7 @@ import mongoose from "mongoose"
 import favicon from "serve-favicon";
 import path from "path";
 import { fileURLToPath } from "url"; // Needed for ES Modules
-/*import fs from "fs";*/  // Only enable if 'export' endpoints are enabled
+import fs from "fs";
 
 dotenv.config();
 
@@ -85,26 +85,12 @@ app.post("/fetch-description", async (req, res) => {
         return res.status(400).json({ error: "Missing artefact or profile" });
     }
 
-    // Ensure the request is for the latest artefact
-    if (req.body.artefact !== artefact) {
-        console.log("🔄 Artefact changed, ignoring outdated request.");
-        return res.status(400).json({ response: "Artefact changed, ignoring outdated request." });
-    }
-
     try {
         let thread;
 
         if (threadId) {
             thread = await Thread.findOne({ threadId });
-
-            if (thread && thread.artefact !== artefact) {
-                console.log(`🔄 Thread ID belongs to a different artefact (${thread.artefact} vs ${artefact}). Resetting thread.`);
-                thread = null;
-            }
-
-            if (thread) {
-                console.log(`🔄 Using existing Thread ID: ${threadId}`);
-            }
+            console.log(`🔄 Using existing Thread ID: ${threadId}`);
         }
 
         if (!thread) {
@@ -235,23 +221,20 @@ app.post("/fetch-more-info", async (req, res) => {
 
     try {
         const thread = await Thread.findOne({ threadId });
+
         if (!thread) {
             console.error("❌ No existing thread found.");
             return res.status(400).json({ error: "No existing thread found." });
         }
 
-        if (req.body.artefact !== artefact) {
-            console.log("🔄 Artefact changed, ignoring outdated 'Tell Me More' request.");
-            return res.status(400).json({ response: "Artefact changed, ignoring outdated request." });
-        }
-
-        let prompt = `The visitor with the "${profile}" profile wants to learn more about the "${artefact}" artefact.\nProvide additional, non-redundant information that expands on the artefact. The new content should remain engaging, accurate, and tailored to the visitor’s profile preferences without explicitly referencing their profile or repeating previous details. If no significant new information is available, offer a subtle acknowledgment of that while maintaining an informative tone`;
+        let prompt = `The visitor with the "${profile}" profile wants to learn more about the "${artefact}" artefact.\n\nPlease provide additional, non-redundant information that expands on the artefact. The new content should remain engaging, accurate, and tailored to the visitor’s profile preferences without explicitly referencing their profile or repeating previous details. If no significant new information is available, offer a subtle acknowledgment of that while maintaining an informative tone.`;
 
         thread.messages.push({
             role: "user",
             content: prompt,
             timestamp: new Date()
         });
+
         await thread.save();
 
         const messageResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
@@ -260,12 +243,8 @@ app.post("/fetch-more-info", async (req, res) => {
             body: JSON.stringify({ role: "user", content: prompt }),
             timeout: 60000,
         });
-        const messageData = await messageResponse.json();
 
-        if (!messageData.id) {
-            console.error("❌ Failed to add message (Tell Me More).");
-            return res.status(500).json({ response: "Error: Could not send 'Tell Me More' prompt to assistant." });
-        }
+        const messageData = await messageResponse.json();
 
         const runResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs`, {
             method: "POST",
@@ -273,27 +252,19 @@ app.post("/fetch-more-info", async (req, res) => {
             body: JSON.stringify({ assistant_id: process.env.ASSISTANT_ID }),
             timeout: 60000,
         });
-        const runData = await runResponse.json();
-        if (!runData.id) {
-            console.error("❌ Failed to start assistant.");
-            return res.status(500).json({ response: "Error: Assistant could not start processing." });
-        }
 
-        // 5) POLL for completion
+        const runData = await runResponse.json();
+
         let status = "in_progress";
         let responseContent = "";
-        let attemptCount = 0;
+
         while (status === "in_progress" || status === "queued") {
-            if (attemptCount > 10) {
-                console.error("⏳ Assistant took too long. Timing out.");
-                return res.status(500).json({ response: "Error: Assistant took too long to respond." });
-            }
             await new Promise(resolve => setTimeout(resolve, 3000));
-            attemptCount++;
 
             const checkRunResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs/${runData.id}`, {
                 headers: OPENAI_HEADERS,
             });
+
             const checkRunData = await checkRunResponse.json();
             status = checkRunData.status;
 
@@ -301,15 +272,18 @@ app.post("/fetch-more-info", async (req, res) => {
                 const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
                     headers: OPENAI_HEADERS,
                 });
+
                 const messagesData = await messagesResponse.json();
                 const assistantMessage = messagesData.data.find(msg => msg.role === "assistant");
 
                 responseContent = assistantMessage?.content[0]?.text?.value || "No additional information found.";
+
                 thread.messages.push({
                     role: "assistant",
                     content: responseContent,
                     timestamp: new Date()
                 });
+
                 await thread.save();
                 break;
             }
@@ -323,6 +297,30 @@ app.post("/fetch-more-info", async (req, res) => {
     }
 });
 
+// API route for fetching TTS audio
+app.post("/fetch-tts", async (req, res) => {
+    const { text } = req.body;
+
+    if (!text) {
+        return res.status(400).json({ error: "Missing text input for TTS" });
+    }
+
+    try {
+        const audioBuffer = await fetchTTSWithRetry(text);
+
+        res.set({
+            "Content-Type": "audio/mpeg",
+            "Content-Length": audioBuffer.length,
+            "Accept-Ranges": "bytes",
+            "Cache-Control": "no-cache",
+        });
+
+        res.send(audioBuffer);
+    } catch (error) {
+        console.error("❌ Error fetching TTS:", error);
+        res.status(500).json({ error: "Failed to generate TTS audio" });
+    }
+});
 
 
 // Function to fetch TTS with automatic retries
