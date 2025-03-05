@@ -465,6 +465,7 @@
                 console.error("❌ Missing required fields: artefact or profile");
                 return;
             }
+
             if (!currentThreadId) {
                 console.error("⚠️ No threadId found, creating a new thread instead of continuing.");
             }
@@ -511,24 +512,13 @@
                 signal: signal // Attach signal to allow aborting the request
             })
                 .then(response => response.json())
-                .then(async response => {
-                    if (!response.ok) {
-                        if (response.status === 400) {
-                            console.log("Ignoring outdated 'Tell Me More' request (server returned 400).");
-                            return null;  // do NOT show error, just ignore
-                        }
-                        // For 500 or other errors, parse & throw:
-                        const errBody = await response.json();
-                        throw new Error(errBody.response || "Failed to fetch additional info.");
-                    }
-                    return response.json();
-                })
                 .then(data => {
                     // Check if the user has navigated away before updating the UI
                     if (requestedArtefact !== currentArtefact) {
                         console.log("🔄 User navigated away. Ignoring outdated response.");
                         return;
                     }
+
                     document.getElementById("artefact-description").innerText = data.response;
 
                     // Re-show sticky controls after content loads
@@ -549,20 +539,24 @@
                         console.log("⚠️ Fetch was aborted. No UI update.");
                         return;
                     }
+
                     // Check if the artefact for which this request was made is still the active one.
                     if (requestedArtefact !== currentArtefact) {
                         console.log("User navigated away, ignoring outdated response error.");
                         return;
                     }
+
                     console.error("❌ Error fetching more details:", error);
                     document.getElementById("artefact-description").innerText = "Failed to fetch additional information.";
                     moreInfoButton.style.display = "block";
+
                     setTimeout(() => {
                         document.getElementById("sticky-audio-controls").classList.remove("hidden");
                         document.getElementById("sticky-audio-controls").classList.add("visible");
                     }, 300);
                 });
         }
+
 
         // Helper to detect mobile devices
         function isMobileDevice() {
