@@ -264,3 +264,10 @@ body {
     transform: translateX(-50%);
     color: #5c3d9e;
 }
+
+.audio-error {
+    color: #2a1a5e;
+    /* Red for visibility */
+    font-weight: bold;
+    margin: 10px 0;
+}

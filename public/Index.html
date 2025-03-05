@@ -647,7 +647,7 @@
                     setTimeout(() => {
                         if (!hasAudioLoaded && !isMobileDevice()) {
                             console.error("⛔ Audio failed to load within timeout.");
-                            showAudioError(playButton, "⚠️ The narrator couldn't narrate. Try again later.");
+                            showAudioError(playButton, "⚠️ It may take longer than expected to load the Narrator.");
                         }
                     }, 7000);
                 })
