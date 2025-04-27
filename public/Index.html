@@ -361,23 +361,24 @@
 
             document.getElementById("quiz-container").innerHTML = `
         <div class="artefacts-container">
-            <button onclick="showArtefacts('${profile}')" class="back-button">⬅️ Back to Artefacts</button>
+            <h2>${artefact}</h2>
+            <p id="loading" class="loading">🔄 Adapting description...</p>  <!-- ✅ KEEP this -->
+            <p id="artefact-description" class="artefact-text"></p>        <!-- ✅ KEEP this -->
         </div>
 
-       <div id="sticky-audio-controls" class="sticky-audio-controls hidden">
-    <button id="toggle-controls" onclick="toggleStickyControls()">⬇️</button>
-    <p id="audio-loading" class="loading" style="display: none;">🔊 The narrator is getting ready...</p>
-    <button id="playPauseButton" onclick="toggleAudio()" class="audio-button" style="display: none;">🔊 Listen To Narration</button>
-    <button id="moreInfoButton" onclick="requestMoreInfo('${artefact}', '${profile}')" class="audio-button" style="display: none;">📝 Tell Me More...</button>
+        <div id="sticky-audio-controls" class="sticky-audio-controls hidden">
+            <button id="toggle-controls" onclick="toggleStickyControls()">⬇️</button>
+            <p id="audio-loading" class="loading" style="display: none;">🔊 The narrator is getting ready...</p>
+            <button id="playPauseButton" onclick="toggleAudio()" class="audio-button" style="display: none;">🔊 Listen To Narration</button>
+            <button id="moreInfoButton" onclick="requestMoreInfo('${artefact}', '${profile}')" class="audio-button" style="display: none;">📝 Tell Me More...</button>
 
-    <!-- Audio Preferences Section -->
-    <div id="audio-preferences" style="width:90%; max-width:400px; margin-top:10px;">
-        <button class="audio-button" onclick="cycleLanguage()">🌐 Language: <span id="language-value">English</span></button>
-        <button class="audio-button" onclick="cycleVoice()">🗣️ Voice: <span id="voice-value">Nova</span></button>
-        <button class="audio-button" onclick="cycleTone()">🎭 Tone: <span id="tone-value">Neutral</span></button>
-        <button class="audio-button" onclick="cycleSpeed()">⏩ Speed: <span id="speed-value">Normal</span></button>
-    </div>
-</div>
+            <div id="audio-preferences" style="width:90%; max-width:400px; margin-top:10px;">
+                <button class="audio-button" onclick="cycleLanguage()">🌐 Language: <span id="language-value">English</span></button>
+                <button class="audio-button" onclick="cycleVoice()">🗣️ Voice: <span id="voice-value">Nova</span></button>
+                <button class="audio-button" onclick="cycleTone()">🎭 Tone: <span id="tone-value">Neutral</span></button>
+                <button class="audio-button" onclick="cycleSpeed()">⏩ Speed: <span id="speed-value">Normal</span></button>
+            </div>
+        </div>
     `;
 
             fetchOpenAITTS(artefact, profile);
