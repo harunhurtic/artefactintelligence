@@ -323,14 +323,14 @@ app.post("/fetch-more-info", async (req, res) => {
 });
 
 app.post("/fetch-tts", async (req, res) => {
-    const { text } = req.body;
+    const { text, language, voice, tone, speed } = req.body;
 
     if (!text) {
         return res.status(400).json({ error: "Missing text input for TTS" });
     }
 
     try {
-        const audioBuffer = await fetchTTSWithRetry(text);
+        const audioBuffer = await fetchTTSWithRetry(text, language, voice, tone, speed);
 
         res.set({
             "Content-Type": "audio/mpeg",
@@ -347,20 +347,27 @@ app.post("/fetch-tts", async (req, res) => {
 });
 
 // Function to fetch TTS with automatic retries
-async function fetchTTSWithRetry(text, retries = 3) {
+async function fetchTTSWithRetry(text, language, voice = "nova", tone = "neutral", speed = "1.0", retries = 3) {
     for (let i = 0; i < retries; i++) {
         try {
             console.log(`Sending Text-to-Speech Request (Attempt ${i + 1})...`);
 
+            const payload = {
+                model: "tts-1",
+                input: text,
+                voice: voice,
+                speed: parseFloat(speed)
+            };
+
+            if (language && language === "Norwegian") {
+                payload.input = "Norsk: " + text; // Prepend "Norsk" to help OpenAI guess language better
+            }
+
             const response = await fetch("https://api.openai.com/v1/audio/speech", {
                 method: "POST",
                 headers: OPENAI_HEADERS,
-                body: JSON.stringify({
-                    model: "tts-1",
-                    input: text,
-                    voice: "nova",
-                }),
-                timeout: 60000,  // ✅ Increase timeout to 60s
+                body: JSON.stringify(payload),
+                timeout: 60000,
             });
 
             if (!response.ok) throw new Error(`Failed to generate audio: ${response.statusText}`);
@@ -374,7 +381,7 @@ async function fetchTTSWithRetry(text, retries = 3) {
                 console.error("🚨 TTS service unavailable after multiple retries.");
                 throw error;
             }
-            await new Promise(res => setTimeout(res, 2000)); // ⏳ Wait before retrying
+            await new Promise(res => setTimeout(res, 2000));
         }
     }
 }
