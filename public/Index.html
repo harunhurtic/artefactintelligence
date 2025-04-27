@@ -23,6 +23,10 @@
         let currentThreadId = null; // Global variable to store threadId
         let controlsExpanded = true;  // Track expand/collapse state
         let currentArtefact = null;
+        let selectedLanguage = "English";    // Default
+        let selectedVoice = "nova";           // Default
+        let selectedTone = "neutral";         // Default
+        let selectedSpeed = "1.0";            // Default
 
         const questions = [
             /*{
@@ -360,18 +364,19 @@
             <button onclick="showArtefacts('${profile}')" class="back-button">⬅️ Back to Artefacts</button>
         </div>
 
-        <div class="artefacts-container">
-            <h2>${artefact}</h2>
-            <p id="loading" class="loading">🔄 Adapting description...</p>
-            <p id="artefact-description" class="artefact-text"></p>
-        </div>
-
-        <!-- Sticky Audio Controls at the Bottom (Hidden Initially) -->
-        <div id="sticky-audio-controls" class="sticky-audio-controls hidden">
+       <div id="sticky-audio-controls" class="sticky-audio-controls hidden">
     <button id="toggle-controls" onclick="toggleStickyControls()">⬇️</button>
     <p id="audio-loading" class="loading" style="display: none;">🔊 The narrator is getting ready...</p>
     <button id="playPauseButton" onclick="toggleAudio()" class="audio-button" style="display: none;">🔊 Listen To Narration</button>
     <button id="moreInfoButton" onclick="requestMoreInfo('${artefact}', '${profile}')" class="audio-button" style="display: none;">📝 Tell Me More...</button>
+
+    <!-- Audio Preferences Section -->
+    <div id="audio-preferences" style="width:90%; max-width:400px; margin-top:10px;">
+        <button class="audio-button" onclick="cycleLanguage()">🌐 Language: <span id="language-value">English</span></button>
+        <button class="audio-button" onclick="cycleVoice()">🗣️ Voice: <span id="voice-value">Nova</span></button>
+        <button class="audio-button" onclick="cycleTone()">🎭 Tone: <span id="tone-value">Neutral</span></button>
+        <button class="audio-button" onclick="cycleSpeed()">⏩ Speed: <span id="speed-value">Normal</span></button>
+    </div>
 </div>
     `;
 
@@ -590,7 +595,13 @@
             fetch("https://artefactintelligence.hurtic.net/fetch-tts", {  // Replace with your API URL
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text }),
+                body: JSON.stringify({
+                    text,
+                    language: selectedLanguage,
+                    voice: selectedVoice,
+                    tone: selectedTone,
+                    speed: selectedSpeed
+                }),
             })
                 .then(response => {
                     if (!response.ok) throw new Error(`Server responded with status: ${response.status}`);
@@ -738,6 +749,37 @@
             }
 
             controlsExpanded = !controlsExpanded;
+        }
+
+        function cycleLanguage() {
+            selectedLanguage = selectedLanguage === "English" ? "Norwegian" : "English";
+            document.getElementById("language-value").innerText = selectedLanguage;
+        }
+
+        function cycleVoice() {
+            const voices = ["nova", "shimmer", "echo", "onyx", "fable", "alloy"];
+            let index = voices.indexOf(selectedVoice);
+            selectedVoice = voices[(index + 1) % voices.length];
+            document.getElementById("voice-value").innerText = selectedVoice.charAt(0).toUpperCase() + selectedVoice.slice(1);
+        }
+
+
+        function cycleTone() {
+            const tones = ["neutral", "enthusiastic", "calm"];
+            let index = tones.indexOf(selectedTone);
+            selectedTone = tones[(index + 1) % tones.length];
+            document.getElementById("tone-value").innerText = selectedTone.charAt(0).toUpperCase() + selectedTone.slice(1);
+        }
+
+        function cycleSpeed() {
+            const speeds = ["0.75", "1.0", "1.25", "1.5"];
+            let labels = { "0.75": "Slow", "1.0": "Normal", "1.25": "Fast", "1.5": "Very Fast" };
+            let index = speeds.indexOf(selectedSpeed);
+            selectedSpeed = speeds[(index + 1) % speeds.length];
+            document.getElementById("speed-value").innerText = labels[selectedSpeed];
+            if (audio) {
+                audio.playbackRate = parseFloat(selectedSpeed);
+            }
         }
 
         function renderPreferences() {
