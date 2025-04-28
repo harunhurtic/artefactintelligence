@@ -215,7 +215,14 @@
 
             let nextButton = document.createElement("button");
             nextButton.className = "nextprev-button";
-            nextButton.innerText = "Next Question ➡️";
+
+            // Check if it's the last question
+            if (questionIndex === questions.length - 1) {
+                nextButton.innerText = "Go to Artefacts ➡️";
+            } else {
+                nextButton.innerText = "Next Question ➡️";
+            }
+
             nextButton.onclick = () => renderQuestion(questionIndex + 1);
             nextButtonCard.appendChild(nextButton);
 
@@ -849,7 +856,7 @@
 
         window.onload = renderParticipantScreen;
 
-        /* Developed by Harun Hurtic as part of his Master's Thesis at the Norwegian University of Science and Technology (NTNU) */
+        /* Proof-of-Concept Developed by Harun Hurtic as part of his Master's Thesis at the Norwegian University of Science and Technology (NTNU) */
 
     </script>
 </body>
