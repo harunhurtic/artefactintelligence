@@ -54,6 +54,7 @@ mongoose.connection.on("disconnected", () => console.error("⚠️ MongoDB Disco
 const threadSchema = new mongoose.Schema({
     threadId: String,
     participantId: String,
+    artefact: String,
     createdAt: { type: Date, default: Date.now },
     messages: [{ role: String, content: String, timestamp: Date }]
 });
