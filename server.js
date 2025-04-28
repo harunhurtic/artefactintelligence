@@ -134,7 +134,7 @@ app.post("/fetch-description", async (req, res) => {
             console.log(`✅ Created Thread ID: ${thread.threadId}`);
         }
 
-        let prompt = `Adapt the following artefact description and make it more engaging for a museum visitor with the "${profile}" profile while preserving factual accuracy. Ensure that the adaptation aligns with the preferences, interests, and motivations of their profile, without explicitly mentioning their profile or adding unnecessary details.\n\nArtefact: "${artefact}".\nDescription: "${originalDescription}"`;
+        let prompt = `Adapt the following artefact description to ${language} and make it more engaging for a museum visitor with the "${profile}" profile while preserving factual accuracy. Ensure that the adaptation aligns with the preferences, interests, and motivations of their profile, without explicitly mentioning their profile or adding unnecessary details.\n\nArtefact: "${artefact}".\nDescription: "${originalDescription}"`;
 
         const messageResponse = await fetch(`https://api.openai.com/v1/threads/${thread.threadId}/messages`, {
             method: "POST",
@@ -244,7 +244,7 @@ app.post("/fetch-more-info", async (req, res) => {
             return res.status(400).json({ response: "Artefact changed, ignoring outdated request." });
         }
 
-        let prompt = `The visitor with the "${profile}" profile wants to learn more about the "${artefact}" artefact. They have already seen the following information: "${currentDescription}". \n Provide additional, non-redundant information that expands on the artefact. The new content should remain engaging, accurate, and tailored to the visitor’s profile preferences without explicitly referencing their profile or repeating previous details. If no significant new information is available, offer a subtle acknowledgment of that while maintaining an informative tone.`;
+        let prompt = `The visitor with the "${profile}" profile wants to learn more about the "${artefact}" artefact. They have already seen the following information: "${currentDescription}". \n Provide additional, non-redundant information in ${language} that expands on the artefact. The new content should remain engaging, accurate, and tailored to the visitor’s profile preferences without explicitly referencing their profile or repeating previous details. If no new information is available to provide, just offer an acknowledgment of that while maintaining an informative tone.`;
 
         thread.messages.push({
             role: "user",
@@ -323,14 +323,14 @@ app.post("/fetch-more-info", async (req, res) => {
 });
 
 app.post("/fetch-tts", async (req, res) => {
-    const { text, voice, tone } = req.body;
+    const { text, voice } = req.body;
 
     if (!text) {
         return res.status(400).json({ error: "Missing text input for TTS" });
     }
 
     try {
-        const audioBuffer = await fetchTTSWithRetry(text);
+        const audioBuffer = await fetchTTSWithRetry(text, voice);
 
         res.set({
             "Content-Type": "audio/mpeg",
@@ -347,11 +347,11 @@ app.post("/fetch-tts", async (req, res) => {
 });
 
 // Function to fetch TTS with automatic retries
-async function fetchTTSWithRetry(text, voice = "nova", tone = "neutral", retries = 3) {
+async function fetchTTSWithRetry(text, voice, retries = 3) {
 
     for (let i = 0; i < retries; i++) {
         try {
-            console.log(`Sending Text-to-Speech Request (Attempt ${i + 1})...`);
+            console.log(`Sending Text-to-Speech Request (Attempt ${i + 1}) with voice: ${voice}...`);
 
             const response = await fetch("https://api.openai.com/v1/audio/speech", {
                 method: "POST",
