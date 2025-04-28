@@ -419,4 +419,4 @@ console.log("🤖 Assistant ID:", process.env.ASSISTANT_ID ? "Loaded" : "MISSING
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
 
-/* Developed by Harun Hurtic as part of his Master's Thesis at the Norwegian University of Science and Technology (NTNU) */
+/* Proof-of-Concept Developed by Harun Hurtic as part of his Master's Thesis at the Norwegian University of Science and Technology (NTNU) */
