@@ -367,8 +367,7 @@ async function fetchTTSWithRetry(text, voice = "nova", tone = "neutral", retries
 
             if (!response.ok) throw new Error(`Failed to generate audio: ${response.statusText}`);
 
-            const audioBuffer = await fetchTTSWithRetry(text, voice || "nova", tone || "neutral");
-
+            const audioBuffer = await response.arrayBuffer();
             console.log("🔊 TTS Audio successfully generated!");
             return Buffer.from(audioBuffer);
         } catch (error) {
