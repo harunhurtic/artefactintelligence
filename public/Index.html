@@ -23,10 +23,6 @@
         let currentThreadId = null; // Global variable to store threadId
         let controlsExpanded = true;  // Track expand/collapse state
         let currentArtefact = null;
-        let selectedLanguage = "English";    // Default
-        let selectedVoice = "nova";           // Default
-        let selectedTone = "neutral";         // Default
-        let selectedSpeed = "1.0";            // Default
 
         const questions = [
             /*{
@@ -37,7 +33,7 @@
             },*/
 
             {
-                text: "How often do you visit museums? (1/6)", options: [
+                text: "How often do you visit museums? (1/9)", options: [
                     { answer: "As often as I can. I love discovering new things.", score: 5, profile: "Explorer" },
                     { answer: "Occasionally, but mostly when I’m bringing someone along.", score: 7, profile: "Facilitator" },
                     { answer: "Regularly, especially when there’s a relevant exhibit to my interests.", score: 4, profile: "Professional/Hobbyist" },
@@ -46,7 +42,7 @@
                 ]
             },
             {
-                text: "What is your main reason for visiting a museum? (2/6)", options: [
+                text: "What is your main reason for visiting a museum? (2/9)", options: [
                     { answer: "To discover and learn something new.", score: 3, profile: "Explorer" },
                     { answer: "To help someone else engage with exhibits and contents.", score: 4, profile: "Facilitator" },
                     { answer: "Because it aligns with my professional/hobby interests.", score: 5, profile: "Professional/Hobbyist" },
@@ -55,7 +51,7 @@
                 ]
             },
             {
-                text: "What’s the first thing you usually do in a museum? (3/6)", options: [
+                text: "What’s the first thing you usually do in a museum? (3/9)", options: [
                     { answer: "Wander and explore whatever catches my attention.", score: 6, profile: "Explorer" },
                     { answer: "Make sure my companions are engaged and having a good time.", score: 3, profile: "Facilitator" },
                     { answer: "Go straight to the exhibits related to my field of interest", score: 4, profile: "Professional/Hobbyist" },
@@ -64,7 +60,7 @@
                 ]
             },
             {
-                text: "What kind of museum exhibit excites you the most? (4/6)", options: [
+                text: "What kind of museum exhibit excites you the most? (4/9)", options: [
                     { answer: "Hands-on, interactive, or unexpected discoveries.", score: 4, profile: "Explorer" },
                     { answer: "Exhibits designed for all ages to enjoy together.", score: 6, profile: "Facilitator" },
                     { answer: "Niche, highly detailed content that aligns with my passion.", score: 7, profile: "Professional/Hobbyist" },
@@ -73,7 +69,7 @@
                 ]
             },
             {
-                text: "What would make a museum visit disappointing for you? (5/6)", options: [
+                text: "What would make a museum visit disappointing for you? (5/9)", options: [
                     { answer: "If there’s nothing new to explore or learn.", score: 7, profile: "Explorer" },
                     { answer: "If my companion(s) didn’t enjoy it.", score: 5, profile: "Facilitator" },
                     { answer: "If the exhibits didn’t go deep enough into the subject.", score: 6, profile: "Professional/Hobbyist" },
@@ -82,14 +78,38 @@
                 ]
             },
             {
-                text: "How do you usually feel after a museum visit? (6/6)", options: [
+                text: "How do you usually feel after a museum visit? (6/9)", options: [
                     { answer: "Excited about what I discovered and eager to learn more.", score: 5, profile: "Explorer" },
                     { answer: "Happy that my group enjoyed it and learned something.", score: 7, profile: "Facilitator" },
                     { answer: "Inspired to apply what I saw to my work or hobbies.", score: 3, profile: "Professional/Hobbyist" },
                     { answer: "Satisfied that I’ve checked off a great cultural experience.", score: 4, profile: "Experience Seeker" },
                     { answer: "Calm, refreshed, and maybe a little nostalgic.", score: 6, profile: "Recharger" }
                 ]
+            },
+            {
+                text: "What language would you prefer in descriptions/narrations? (7/9)", options: [
+                    { answer: "English", language: "en" },
+                    { answer: "Norwegian", language: "no" }
+                ]
+            },
+            {
+                text: "Which tone of narration do you prefer? (8/9)", options: [
+                    { answer: "Neutral Narration", tone: "neutral" },
+                    { answer: "Enthusiastic Narration", tone: "enthusiastic" },
+                    { answer: "Calm Narration", tone: "calm" }
+                ]
+            },
+            {
+                text: "Choose your narrator's voice (9/9)", options: [
+                    { answer: "Nova", voice: "nova" },
+                    { answer: "Shimmer", voice: "shimmer" },
+                    { answer: "Echo", voice: "echo" },
+                    { answer: "Onyx", voice: "onyx" },
+                    { answer: "Alloy", voice: "alloy" },
+                    { answer: "Fable", voice: "fable" }
+                ]
             }
+
         ];
 
         const artefactDescriptions = {
@@ -250,6 +270,16 @@
                 console.log(`✅ Delivery Preference Updated: ${deliveryPreference}`);
             }
 
+            if (selectedOption.language) {
+                userResponses.language = selectedOption.language;
+            }
+            if (selectedOption.tone) {
+                userResponses.tone = selectedOption.tone;
+            }
+            if (selectedOption.voice) {
+                userResponses.voice = selectedOption.voice;
+            }
+
             // Deselect other options
             const optionButtons = selectedButton.parentElement.querySelectorAll(".option-button");
             optionButtons.forEach(button => button.classList.remove("selected"));
@@ -300,13 +330,26 @@
 
             // Get delivery preference
             let deliveryMode = deliveryPreference === "Auditory" ? "Auditory" : "Text-Based";
+            let languageDisplay = "";
+            let toneDisplay = "";
+            let voiceDisplay = "";
+
+            for (let key in userResponses) {
+                const response = userResponses[key];
+                if (response.language) languageDisplay = response.answer;
+                if (response.tone) toneDisplay = response.answer;
+                if (response.voice) voiceDisplay = response.answer;
+            }
 
             document.getElementById("quiz-container").innerHTML = `
         <!-- Title/Profile Section -->
         <div class="artefacts-container">
             <h1>Museum - Artefacts</h1>
             <p><strong>Assigned Profile:</strong> ${profile}</p>
-            <p><strong>Delivery:</strong> ${deliveryMode}</p>
+              <p><strong>Language:</strong> ${languageDisplay} </p>
+               <p><strong>Tone of Narration:</strong> ${toneDisplay} </p>
+                <p><strong>Narrator:</strong> ${voiceDisplay}</p>
+
             <button onclick="renderQuestionnaire()" class="nav-button">🔄 Change Preferences</button>
         </div>
 
@@ -370,16 +413,18 @@
             <p id="artefact-description" class="artefact-text"></p>
         </div>
 
-          <div id="sticky-audio-controls" class="sticky-audio-controls hidden">
-            <button id="toggle-controls" onclick="toggleStickyControls()">⬇️</button>
-            <p id="audio-loading" class="loading" style="display: none;">🔊 The narrator is getting ready...</p>
-            <button id="playPauseButton" onclick="toggleAudio()" class="audio-button" style="display: none;">🔊 Listen To Narration</button>
-            <button id="moreInfoButton" onclick="requestMoreInfo('${artefact}', '${profile}')" class="audio-button" style="display: none;">📝 Tell Me More...</button>
-            <button class="audio-button" onclick="cycleLanguage()">🌐 Language: <span id="language-value">English</span></button>
-            <button class="audio-button" onclick="cycleVoice()">🗣️ Voice: <span id="voice-value">Nova</span></button>
-            <button class="audio-button" onclick="cycleTone()">🎭 Tone: <span id="tone-value">Neutral</span></button>
-            <button class="audio-button" onclick="cycleSpeed()">⏩ Speed: <span id="speed-value">Normal</span></button>
-        </div>
+        <!-- Sticky Audio Controls at the Bottom (Hidden Initially) -->
+        <div id="sticky-audio-controls" class="sticky-audio-controls hidden">
+    <button id="toggle-controls" onclick="toggleStickyControls()">⬇️</button>
+    <p id="audio-loading" class="loading" style="display: none;">🔊 The narrator is getting ready...</p>
+    <div id="audio-buttons-group" style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
+        <button id="rewindButton" class="audio-button small-button" style="display: none;">⏪ Rewind 10s</button>
+        <button id="playPauseButton" onclick="toggleAudio()" class="audio-button" style="display: none;">🔊 Listen To Narration</button>
+        <button id="forwardButton" class="audio-button small-button" style="display: none;">⏩ Forward 10s</button>
+        <button id="speedButton" class="audio-button small-button" style="display: none;">⏩ Speed 1.0x</button>
+    </div>
+    <button id="moreInfoButton" onclick="requestMoreInfo('${artefact}', '${profile}')" class="audio-button" style="display: none;">📝 Tell Me More...</button>
+</div>
     `;
 
             fetchOpenAITTS(artefact, profile);
@@ -408,7 +453,14 @@
             fetch("https://artefactintelligence.hurtic.net/fetch-description", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ artefact, originalDescription, profile, threadId: currentThreadId }),
+                body: JSON.stringify({
+                    artefact,
+                    originalDescription,
+                    profile,
+                    threadId: currentThreadId,
+                    language: userResponses.language || "en",  // default to English
+                    tone: userResponses.tone || "neutral"       // default to Neutral
+                }),
                 signal: signal  // Attach signal to abort if needed
             })
                 .then(response => response.json())
@@ -599,10 +651,8 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     text,
-                    language: selectedLanguage,
-                    voice: selectedVoice,
-                    tone: selectedTone,
-                    speed: selectedSpeed
+                    voice: userResponses.voice || "nova",   // default to Nova
+                    tone: userResponses.tone || "neutral"    // optional - if you also want tone for TTS model
                 }),
             })
                 .then(response => {
@@ -627,6 +677,36 @@
                         playButton.style.display = "block";
                         playButton.innerText = "🔊 Listen To Narration";
                         moreInfoButton.style.display = "block";
+
+                        document.getElementById("rewindButton").style.display = "block";
+                        document.getElementById("forwardButton").style.display = "block";
+                        document.getElementById("speedButton").style.display = "block";
+
+                        // Setup Rewind Button
+                        document.getElementById("rewindButton").onclick = () => {
+                            if (audio) {
+                                audio.currentTime = Math.max(0, audio.currentTime - 10);
+                            }
+                        };
+
+                        // Setup Forward Button
+                        document.getElementById("forwardButton").onclick = () => {
+                            if (audio) {
+                                audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
+                            }
+                        };
+
+                        // Setup Speed Button
+                        const playbackSpeeds = [1.0, 1.25, 1.5, 2.0];
+                        let currentSpeedIndex = 0;
+                        document.getElementById("speedButton").onclick = () => {
+                            if (audio) {
+                                currentSpeedIndex = (currentSpeedIndex + 1) % playbackSpeeds.length;
+                                audio.playbackRate = playbackSpeeds[currentSpeedIndex];
+                                document.getElementById("speedButton").innerText = `⏩ ${playbackSpeeds[currentSpeedIndex]}x`;
+                            }
+                        };
+
                     });
 
                     // Force show play button on mobile even if audio isn't loaded
@@ -751,37 +831,6 @@
             }
 
             controlsExpanded = !controlsExpanded;
-        }
-
-        function cycleLanguage() {
-            selectedLanguage = selectedLanguage === "English" ? "Norwegian" : "English";
-            document.getElementById("language-value").innerText = selectedLanguage;
-        }
-
-        function cycleVoice() {
-            const voices = ["nova", "shimmer", "echo", "onyx", "fable", "alloy"];
-            let index = voices.indexOf(selectedVoice);
-            selectedVoice = voices[(index + 1) % voices.length];
-            document.getElementById("voice-value").innerText = selectedVoice.charAt(0).toUpperCase() + selectedVoice.slice(1);
-        }
-
-
-        function cycleTone() {
-            const tones = ["neutral", "enthusiastic", "calm"];
-            let index = tones.indexOf(selectedTone);
-            selectedTone = tones[(index + 1) % tones.length];
-            document.getElementById("tone-value").innerText = selectedTone.charAt(0).toUpperCase() + selectedTone.slice(1);
-        }
-
-        function cycleSpeed() {
-            const speeds = ["0.75", "1.0", "1.25", "1.5"];
-            let labels = { "0.75": "Slow", "1.0": "Normal", "1.25": "Fast", "1.5": "Very Fast" };
-            let index = speeds.indexOf(selectedSpeed);
-            selectedSpeed = speeds[(index + 1) % speeds.length];
-            document.getElementById("speed-value").innerText = labels[selectedSpeed];
-            if (audio) {
-                audio.playbackRate = parseFloat(selectedSpeed);
-            }
         }
 
         function renderPreferences() {
