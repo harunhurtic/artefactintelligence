@@ -405,15 +405,13 @@
     <button id="toggle-controls" onclick="toggleStickyControls()">⬇️</button>
     <p id="audio-loading" class="loading" style="display: none;">🔊 The narrator is getting ready...</p>
 
-        <div id="audio-buttons-group" style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
-        <button id="rewindButton" class="audio-button small-button" style="display: none;">⏪ 10s</button>
-        <button id="playPauseButton" onclick="toggleAudio()" class="audio-button" style="display: none;">🔊 Listen To Narration</button>
-        <button id="forwardButton" class="audio-button small-button" style="display: none;">⏩ 10s</button>
-        <button id="speedButton" class="audio-button small-button" style="display: none;">⏩ Speed 1.0x</button>
-    </div>
-    <div id="audio-extra-buttons" style="display: flex; justify-content: center; gap: 8px; margin-top: 10px;">
-    <button id="moreInfoButton" onclick="requestMoreInfo('${artefact}', '${profile}')" class="audio-button" style="display: none;">📝 Tell Me More...</button>
-    </div>
+        <div id="audio-buttons-group" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <button id="rewindButton" class="audio-button small-button">⏪</button>
+        <button id="playPauseButton" class="audio-button">🔊 Listen to Narration</button>
+        <button id="forwardButton" class="audio-button small-button">⏩</button>
+</div>
+    <button id="speedButton" class="audio-button">Speed 1.0x</button>
+    <button id="moreInfoButton" onclick="requestMoreInfo('${artefact}', '${profile}')" class="audio-button" style="display: none;">💬 Tell Me More </button>
 </div>
     `;
 
@@ -437,6 +435,9 @@
             document.getElementById("artefact-description").innerText = "";
             document.getElementById("audio-loading").style.display = "none";
             document.getElementById("playPauseButton").style.display = "none";
+            document.getElementById("rewindButton").style.display = "none";
+            document.getElementById("forwardButton").style.display = "none";
+            document.getElementById("speedButton").style.display = "none";
             document.getElementById("moreInfoButton").style.display = "none";
             document.getElementById("sticky-audio-controls").classList.add("hidden");
 
@@ -551,11 +552,17 @@
 
             // Get button elements
             const playButton = document.getElementById("playPauseButton");
+            const rewindButton = document.getElementById("rewindButton");
+            const forwardButton = document.getElementById("forwardButton");
+            const speedButton = document.getElementById("speedButton");
             const moreInfoButton = document.getElementById("moreInfoButton");
             const loadingIndicator = document.getElementById("audio-loading");
 
             // Hide all buttons immediately
             playButton.style.display = "none";
+            rewindButton.style.display = "none";
+            forwardButton.style.display = "none";
+            speedButton.style.display = "none";
             moreInfoButton.style.display = "none";
             loadingIndicator.style.display = "none";
 
@@ -564,7 +571,7 @@
             fetch("https://artefactintelligence.hurtic.net/fetch-more-info", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ artefact, profile, threadId: currentThreadId, currentDescription }),
+                body: JSON.stringify({ artefact, profile, threadId, currentDescription, language: userResponses.language }),
                 signal: signal // Attach signal to allow aborting the request
             })
                 .then(response => response.json())
@@ -624,12 +631,18 @@
             console.log(`🟡 Sending TTS request (More Info: ${isFromMoreInfo})...`);
 
             let playButton = document.getElementById("playPauseButton");
+            let rewindButton = document.getElementById("rewindButton");
+            let forwardButton = document.getElementById("forwardButton");
+            let speedButton = document.getElementById("speedButton");
             let loadingIndicator = document.getElementById("audio-loading");
             let moreInfoButton = document.getElementById("moreInfoButton");
 
             // Immediately show the loading message
             playButton.style.display = "none";
             moreInfoButton.style.display = "none";
+            speedButton.style.display = "none";
+            forwardButton.style.display = "none";
+            rewindButton.style.display = "none";
             loadingIndicator.style.display = "block";
 
             // Remove existing error messages
@@ -664,12 +677,11 @@
                         hasAudioLoaded = true;
                         loadingIndicator.style.display = "none";
                         playButton.style.display = "block";
+                        speedButton.style.display = "block";
+                        forwardButton.style.display = "block";
+                        rewindButton.style.display = "block";
                         playButton.innerText = "🔊 Listen To Narration";
                         moreInfoButton.style.display = "block";
-
-                        document.getElementById("rewindButton").style.display = "block";
-                        document.getElementById("forwardButton").style.display = "block";
-                        document.getElementById("speedButton").style.display = "block";
 
                         // Setup Rewind Button
                         document.getElementById("rewindButton").onclick = () => {
@@ -702,6 +714,10 @@
                     if (isMobileDevice()) {
                         loadingIndicator.style.display = "none";
                         playButton.style.display = "block";
+                        playButton.style.display = "block";
+                        rewindButton.style.display = "block";
+                        forwardButton.style.display = "block";
+                        speedButton.style.display = "block";
                         playButton.innerText = "🔊 Listen To Narration";
                         moreInfoButton.style.display = "block";
                     }
