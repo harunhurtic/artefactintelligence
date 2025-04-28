@@ -570,7 +570,7 @@
             fetch("https://artefactintelligence.hurtic.net/fetch-more-info", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ artefact, profile, currentThreadId, currentDescription, language: userResponses.language }),
+                body: JSON.stringify({ artefact, profile, threadId: currentThreadId, currentDescription, language: userResponses.language }),
                 signal: signal // Attach signal to allow aborting the request
             })
                 .then(response => response.json())
