@@ -78,7 +78,7 @@ app.get("/", (req, res) => {
 app.post("/fetch-description", async (req, res) => {
     console.log("🛠️ Received fetch-description request:", req.body);
 
-    const { artefact, originalDescription, profile, threadId } = req.body;
+    const { artefact, originalDescription, profile, threadId, language, tone } = req.body;
 
     if (!artefact || !originalDescription || !profile) {
         console.error("❌ Missing required fields");
@@ -323,14 +323,14 @@ app.post("/fetch-more-info", async (req, res) => {
 });
 
 app.post("/fetch-tts", async (req, res) => {
-    const { text, language, voice, tone, speed } = req.body;
+    const { text, voice, tone } = req.body;
 
     if (!text) {
         return res.status(400).json({ error: "Missing text input for TTS" });
     }
 
     try {
-        const audioBuffer = await fetchTTSWithRetry(text, language, voice, tone, speed);
+        const audioBuffer = await fetchTTSWithRetry(text);
 
         res.set({
             "Content-Type": "audio/mpeg",
@@ -347,32 +347,28 @@ app.post("/fetch-tts", async (req, res) => {
 });
 
 // Function to fetch TTS with automatic retries
-async function fetchTTSWithRetry(text, language, voice = "nova", tone = "neutral", speed = "1.0", retries = 3) {
+async function fetchTTSWithRetry(text, voice = "nova", tone = "neutral", retries = 3) {
+
     for (let i = 0; i < retries; i++) {
         try {
             console.log(`Sending Text-to-Speech Request (Attempt ${i + 1})...`);
 
-            const payload = {
-                model: "tts-1",
-                input: text,
-                voice: voice,
-                speed: parseFloat(speed)
-            };
-
-            if (language && language === "Norwegian") {
-                payload.input = "Norsk: " + text; // Prepend "Norsk" to help OpenAI guess language better
-            }
-
             const response = await fetch("https://api.openai.com/v1/audio/speech", {
                 method: "POST",
                 headers: OPENAI_HEADERS,
-                body: JSON.stringify(payload),
-                timeout: 60000,
+                body: JSON.stringify({
+                    model: "tts-1",
+                    input: text,
+                    voice: voice,
+                    speed: 1.0,
+                }),
+                timeout: 60000,  // ✅ Increase timeout to 60s
             });
 
             if (!response.ok) throw new Error(`Failed to generate audio: ${response.statusText}`);
 
-            const audioBuffer = await response.arrayBuffer();
+            const audioBuffer = await fetchTTSWithRetry(text, voice || "nova", tone || "neutral");
+
             console.log("🔊 TTS Audio successfully generated!");
             return Buffer.from(audioBuffer);
         } catch (error) {
@@ -381,7 +377,7 @@ async function fetchTTSWithRetry(text, language, voice = "nova", tone = "neutral
                 console.error("🚨 TTS service unavailable after multiple retries.");
                 throw error;
             }
-            await new Promise(res => setTimeout(res, 2000));
+            await new Promise(res => setTimeout(res, 2000)); // ⏳ Wait before retrying
         }
     }
 }
