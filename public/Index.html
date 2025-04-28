@@ -407,11 +407,11 @@
 
         <div id="audio-buttons-group" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
         <button id="rewindButton" class="audio-button small-button">⏪</button>
-        <button id="playPauseButton" class="audio-button">🔊 Listen to Narration</button>
+        <button id="playPauseButton" class="audio-button">▶️</button>
         <button id="forwardButton" class="audio-button small-button">⏩</button>
 </div>
     <button id="speedButton" class="audio-button">Speed 1.0x</button>
-    <button id="moreInfoButton" onclick="requestMoreInfo('${artefact}', '${profile}')" class="audio-button" style="display: none;">💬 Tell Me More </button>
+    <button id="moreInfoButton" onclick="requestMoreInfo('${artefact}', '${profile}')" class="audio-button" style="display: none;">💬 Tell Me More</button>
 </div>
     `;
 
@@ -679,7 +679,7 @@
                         speedButton.style.display = "block";
                         forwardButton.style.display = "block";
                         rewindButton.style.display = "block";
-                        playButton.innerText = "🔊 Listen To Narration";
+                        playButton.innerText = "▶️";
                         moreInfoButton.style.display = "block";
 
                         // Setup Rewind Button
@@ -703,7 +703,7 @@
                             if (audio) {
                                 currentSpeedIndex = (currentSpeedIndex + 1) % playbackSpeeds.length;
                                 audio.playbackRate = playbackSpeeds[currentSpeedIndex];
-                                document.getElementById("speedButton").innerText = `⏩ ${playbackSpeeds[currentSpeedIndex]}x`;
+                                document.getElementById("speedButton").innerText = `Speed: ${playbackSpeeds[currentSpeedIndex]}x`;
                             }
                         };
 
@@ -717,7 +717,7 @@
                         rewindButton.style.display = "block";
                         forwardButton.style.display = "block";
                         speedButton.style.display = "block";
-                        playButton.innerText = "🔊 Listen To Narration";
+                        playButton.innerText = "▶️";
                         moreInfoButton.style.display = "block";
                     }
 
@@ -725,19 +725,19 @@
                     playButton.onclick = () => {
                         if (audio.paused) {
                             audio.play().then(() => {
-                                playButton.innerText = "⏸ Pause Narration";
+                                playButton.innerText = "⏸";
                             }).catch(err => {
                                 console.error("⚠️ Audio playback failed:", err);
                                 showAudioError(playButton, "⚠️ The narrator couldn't narrate. Try again later.");
                             });
                         } else {
                             audio.pause();
-                            playButton.innerText = "▶️ Continue Narration";
+                            playButton.innerText = "▶️";
                         }
                     };
 
                     audio.onended = () => {
-                        playButton.innerText = "🔊 Listen To Narration";
+                        playButton.innerText = "▶️";
                     };
 
                     // Timeout fallback if audio doesn't load in 7 seconds
@@ -789,11 +789,11 @@
                 document.getElementById("audio-loading").style.display = "none";
                 document.getElementById("playPauseButton").style.display = "block";
 
-                document.getElementById("playPauseButton").innerText = "⏸ Pause Narration";
+                document.getElementById("playPauseButton").innerText = "⏸";
                 audio.play();
 
                 audio.onended = () => {
-                    document.getElementById("playPauseButton").innerText = "🔊 Listen To Narration";
+                    document.getElementById("playPauseButton").innerText = "▶️";
                 };
 
             } catch (error) {
@@ -810,13 +810,13 @@
             if (audio.paused) {
                 audio.play().then(() => {
                     console.log("✅ Audio started.");
-                    playButton.innerText = "⏸ Pause Narration";
+                    playButton.innerText = "⏸";
                 }).catch(error => {
                     console.warn("⚠️ Audio play blocked, user interaction required.", error);
                 });
             } else {
                 audio.pause();
-                playButton.innerText = "▶️ Continue Narration";
+                playButton.innerText = "▶️";
             }
         }
 
