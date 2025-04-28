@@ -225,7 +225,7 @@ app.post("/fetch-description", async (req, res) => {
 app.post("/fetch-more-info", async (req, res) => {
     console.log("🛠️ Received fetch-more-info request:", req.body);
 
-    const { artefact, profile, threadId, currentDescription } = req.body;
+    const { artefact, profile, threadId, currentDescription, language } = req.body;
 
     if (!artefact || !profile || !threadId) {
         console.error("❌ Missing required fields: artefact, profile, or threadId");
