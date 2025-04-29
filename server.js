@@ -135,7 +135,7 @@ app.post("/fetch-description", async (req, res) => {
             console.log(`✅ Created Thread ID: ${thread.threadId}`);
         }
 
-        let prompt = `Adapt the following artefact description to ${language} and make it more engaging for a museum visitor with the "${profile}" profile while preserving factual accuracy. Ensure that the adaptation aligns with the preferences, interests, and motivations of their profile, without explicitly mentioning their profile or adding unnecessary details.\n\nArtefact: "${artefact}".\nDescription: "${originalDescription}"`;
+        let prompt = `Adapt the following artefact description in ${language} and make it more engaging for a museum visitor with the "${profile}" profile, while preserving the conciseness and factual accuracy. Ensure that the adaptation aligns with the preferences, interests, and motivations of their profile, without explicitly mentioning their profile or adding unnecessary details.\n\nArtefact: "${artefact}".\nDescription: "${originalDescription}"`;
 
         const messageResponse = await fetch(`https://api.openai.com/v1/threads/${thread.threadId}/messages`, {
             method: "POST",
@@ -245,7 +245,7 @@ app.post("/fetch-more-info", async (req, res) => {
             return res.status(400).json({ response: "Artefact changed, ignoring outdated request." });
         }
 
-        let prompt = `The visitor with the "${profile}" profile wants to learn more about the "${artefact}" artefact. They have already seen the following information: "${currentDescription}". \n Provide additional, non-redundant information in ${language} that expands on the artefact. The new content should remain engaging, accurate, and tailored to the visitor’s profile preferences without explicitly referencing their profile or repeating previous details. If no new information is available to provide, just offer an acknowledgment of that while maintaining an informative tone.`;
+        let prompt = `The visitor with the "${profile}" profile wants to learn more about the "${artefact}" artefact. They have already seen the following information: "${currentDescription}". \n Provide additional, non-redundant information in ${language} that expands on the artefact. The new content should remain engaging, accurate, and adapted to the visitor’s assigned profile preferences without explicitly referencing their profile or repeating previous details. If no new information is available to provide, just offer an acknowledgment of that while maintaining an informative tone.`;
 
         thread.messages.push({
             role: "user",
