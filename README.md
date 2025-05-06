@@ -2,11 +2,13 @@ Welcome to the repository for Artefact Intelligence — a proof-of-concept web-a
 
 📱 Try Out The Proof-of-Concept Here: https://artefactintelligence.hurtic.net
 
+
 🎓 Academic Context:
 
 This application was developed as part of a Master’s Thesis. Title: "Artefact Intelligence: Using AI to Enhance Museum Visitor Engagement Through Personalized Artefact Descriptions", Author: Harun Hurtic, Institution: NTNU – Norwegian University of Science and Technology, Year: 2025.
 
 📖 Read the Thesis Here: (Link to be added here in the future).
+
 
 🧠 How It Works:
 
@@ -19,6 +21,7 @@ This application was developed as part of a Master’s Thesis. Title: "Artefact 
 🔍 Future Development:
 
 The system is a proof-of-concept. Future improvements may include multilingual support, deeper voice personalization, and broader applicability across museums.
+
 
 For collaboration, feedback, or reuse inquiries:
 
