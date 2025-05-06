@@ -11,8 +11,9 @@ Welcome to the repository for Artefact Intelligence — a proof-of-concept web-a
 5. Visitors can explore artefacts, read adapted descriptions, or optionally listen to AI-generated narrations.
 
 🎓 Academic Context:
-This application was developed as part of a Master’s Thesis.
-Title: "Artefact Intelligence: Using AI to Enhance Museum Visitor Engagement Through Personalized Artefact Descriptions", Author: Harun Hurtic, Institution: NTNU – Norwegian University of Science and Technology, Year: 2025.
+
+
+This application was developed as part of a Master’s Thesis. Title: "Artefact Intelligence: Using AI to Enhance Museum Visitor Engagement Through Personalized Artefact Descriptions", Author: Harun Hurtic, Institution: NTNU – Norwegian University of Science and Technology, Year: 2025.
 
 📖 Read the Thesis Here: (Link to be added here in the future).
 
