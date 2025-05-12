@@ -412,12 +412,19 @@
     <button id="toggle-controls" onclick="toggleStickyControls()">⬇️</button>
     <p id="audio-loading" class="loading" style="display: none;">🔊 The narrator is getting ready...</p>
 
-        <div id="audio-buttons-group" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-        <button id="rewindButton" class="audio-button small-button">⏪</button>
-        <button id="playPauseButton" class="audio-button">▶️</button>
-        <button id="forwardButton" class="audio-button small-button">⏩</button>
+        <div id="audio-controls-full" class="audio-controls-full">
+  <div class="button-group">
+    <button id="rewindButton" class="icon-button">⏪</button>
+    <button id="playPauseButton" class="icon-button">▶️</button>
+    <button id="forwardButton" class="icon-button">⏩</button>
+  </div>
+  <div class="timeline-group">
+    <span id="currentTime">0:00</span>
+    <input type="range" id="seekBar" value="0" min="0" step="0.1">
+    <span id="duration">0:00</span>
+  </div>
+  <button id="speedButton" class="speed-button">1x</button>
 </div>
-    <button id="speedButton" class="audio-button">Speed 1.0x</button>
     <button id="moreInfoButton" onclick="requestMoreInfo('${artefact}', '${profile}')" class="audio-button" style="display: none;">💬 Tell Me More</button>
 </div>
     `;
@@ -688,6 +695,34 @@
                         rewindButton.style.display = "block";
                         playButton.innerText = "▶️";
                         moreInfoButton.style.display = "block";
+
+                        // Timestamps and Seek Bar Logic
+                        const seekBar = document.getElementById("seekBar");
+                        const currentTimeDisplay = document.getElementById("currentTime");
+                        const durationDisplay = document.getElementById("duration");
+
+                        seekBar.max = audio.duration;
+
+                        durationDisplay.textContent = formatTime(audio.duration);
+
+                        // Update seekBar and current time while playing
+                        audio.ontimeupdate = () => {
+                            seekBar.value = audio.currentTime;
+                            currentTimeDisplay.textContent = formatTime(audio.currentTime);
+                        };
+
+                        // Allow user to scrub audio
+                        seekBar.oninput = () => {
+                            audio.currentTime = seekBar.value;
+                        };
+
+                        // Utility to format time as M:SS
+                        function formatTime(seconds) {
+                            const mins = Math.floor(seconds / 60);
+                            const secs = Math.floor(seconds % 60);
+                            return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+                        }
+
 
                         // Setup Rewind Button
                         document.getElementById("rewindButton").onclick = () => {
