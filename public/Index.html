@@ -607,9 +607,19 @@
                     document.getElementById("artefact-description").innerText = data.response;
 
                     if (deliveryPreference === "Auditory") {
+                        const stickyControls = document.getElementById("sticky-audio-controls");
+                        const audioControls = document.getElementById("audio-controls-full");
+                        const timeline = document.querySelector(".timeline-group");
+
+                        // Show the sticky bar area only
+                        stickyControls.classList.remove("hidden");
+                        stickyControls.classList.add("visible");
+
+                        // Hide actual playback controls until audio is ready
+                        audioControls.style.display = "none";
+                        timeline.style.display = "none";
                         loadingIndicator.style.display = "block";
-                        document.getElementById("sticky-audio-controls").classList.remove("hidden");
-                        document.getElementById("sticky-audio-controls").classList.add("visible");
+
                         requestTTS(data.response, true);
                     } else {
                         moreInfoButton.style.display = "block";
@@ -637,12 +647,20 @@
                     moreInfoButton.style.display = "block";
 
                     setTimeout(() => {
-                        document.getElementById("sticky-audio-controls").classList.remove("hidden");
-                        document.getElementById("sticky-audio-controls").classList.add("visible");
+                        const stickyControls = document.getElementById("sticky-audio-controls");
+                        const audioControls = document.getElementById("audio-controls-full");
+                        const timeline = document.querySelector(".timeline-group");
+
+                        stickyControls.classList.remove("hidden");
+                        stickyControls.classList.add("visible");
+
+                        // Make sure controls stay hidden
+                        audioControls.style.display = "none";
+                        timeline.style.display = "none";
+                        loadingIndicator.style.display = "none";
                     }, 300);
                 });
         }
-
 
         // Helper to detect mobile devices
         function isMobileDevice() {
