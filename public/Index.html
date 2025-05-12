@@ -611,6 +611,18 @@
                         requestTTS(data.response, true);
                     } else {
                         moreInfoButton.style.display = "block";
+
+                        setTimeout(() => {
+                            document.getElementById("sticky-audio-controls").classList.remove("hidden");
+                            document.getElementById("sticky-audio-controls").classList.add("visible");
+                        }, 300);
+                    }
+
+                    if (deliveryPreference === "Auditory") {
+                        loadingIndicator.style.display = "block";
+                        requestTTS(data.response, true);
+                    } else {
+                        moreInfoButton.style.display = "block";
                     }
                 })
                 .catch(error => {
