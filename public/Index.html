@@ -202,7 +202,7 @@
 
                 let prevButton = document.createElement("button");
                 prevButton.className = "nextprev-button";
-                prevButton.innerText = "⬅️ Previous Question";
+                prevButton.innerHTML = '<i class="fas fa-arrow-left"></i> Previous Question';
                 prevButton.onclick = () => renderQuestion(questionIndex - 1);
 
                 prevButtonCard.appendChild(prevButton);
@@ -219,9 +219,9 @@
 
             // Check if it's the last question
             if (questionIndex === questions.length - 1) {
-                nextButton.innerText = "Go to Artefacts ➡️";
+                nextButton.innerHTML = 'Go to Artefacts <i class="fas fa-arrow-right"></i>';
             } else {
-                nextButton.innerText = "Next Question ➡️";
+                nextButton.innerHTML = 'Next Question <i class="fas fa-arrow-right"></i>';
             }
 
             nextButton.onclick = () => renderQuestion(questionIndex + 1);
@@ -345,7 +345,9 @@
               <p><strong>Language:</strong> ${languageDisplay} </p>
                 <p><strong>Narrator:</strong> ${voiceDisplay}</p>
 
-            <button onclick="renderQuestionnaire()" class="nav-button">🔄 Change Preferences</button>
+            <button onclick="renderQuestionnaire()" class="nav-button">
+  <i class="fa fa-refresh"></i> Change Preferences
+</button>
         </div>
 
         <!-- Artefacts Section -->
@@ -399,7 +401,9 @@
 
             document.getElementById("quiz-container").innerHTML = `
         <div class="artefacts-container">
-            <button onclick="showArtefacts('${profile}')" class="back-button">⬅️ Back to Artefacts</button>
+            <button onclick="showArtefacts('${profile}')" class="back-button">
+  <i class="fas fa-arrow-left"></i> Back to Artefacts
+</button>
         </div>
 
         <div class="artefacts-container">
