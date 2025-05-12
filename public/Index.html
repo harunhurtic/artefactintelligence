@@ -608,6 +608,8 @@
 
                     if (deliveryPreference === "Auditory") {
                         loadingIndicator.style.display = "block";
+                        document.getElementById("sticky-audio-controls").classList.remove("hidden");
+                        document.getElementById("sticky-audio-controls").classList.add("visible");
                         requestTTS(data.response, true);
                     } else {
                         moreInfoButton.style.display = "block";
