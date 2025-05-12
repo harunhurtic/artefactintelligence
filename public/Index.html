@@ -21,7 +21,7 @@
         let audio = null;
         let audioLoadTimeout = null;  // Global timeout tracker
         let currentThreadId = null; // Global variable to store threadId
-        let controlsExpanded = true;  // Track expand/collapse state
+        let controlsExpandesd = true;  // Track expand/collapse state
         let currentArtefact = null;
 
         const questions = [
@@ -454,6 +454,7 @@
             document.getElementById("speedButton").style.display = "none";
             document.getElementById("moreInfoButton").style.display = "none";
             document.getElementById("sticky-audio-controls").classList.add("hidden");
+            document.querySelector(".timeline-group").style.display = "none";
 
             fetch("https://artefactintelligence.hurtic.net/fetch-description", {
                 method: "POST",
@@ -683,6 +684,11 @@
                     }
 
                     audio = new Audio(audioURL);
+                    // Reset audio timeline and time indicators
+                    document.getElementById("seekBar").value = 0;
+                    document.getElementById("seekBar").max = 0;
+                    document.getElementById("currentTime").textContent = "0:00";
+                    document.getElementById("duration").textContent = "0:00";
 
                     let hasAudioLoaded = false;
 
@@ -697,6 +703,7 @@
                         moreInfoButton.style.display = "block";
 
                         // Timestamps and Seek Bar Logic
+                        document.querySelector(".timeline-group").style.display = "flex";
                         const seekBar = document.getElementById("seekBar");
                         const currentTimeDisplay = document.getElementById("currentTime");
                         const durationDisplay = document.getElementById("duration");
@@ -754,7 +761,6 @@
                     // Force show play button on mobile even if audio isn't loaded
                     if (isMobileDevice()) {
                         loadingIndicator.style.display = "none";
-                        playButton.style.display = "block";
                         playButton.style.display = "block";
                         rewindButton.style.display = "block";
                         forwardButton.style.display = "block";

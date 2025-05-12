@@ -118,7 +118,6 @@ body {
     margin: auto;
     text-align: center;
     margin-bottom: 20px;
-    /* Adds space between containers */
 }
 
 /* Back Button in Its Own Card */
@@ -160,14 +159,6 @@ body {
     max-width: 600px;
     margin: auto;
     text-align: center;
-}
-
-/* Audio Container */
-.audio-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 20px;
 }
 
 /* Loading Animation */
@@ -355,4 +346,34 @@ body {
 
 .speed-button:hover {
     background-color: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 500px) {
+    .audio-controls-full {
+        flex-direction: column;
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .timeline-group {
+        flex-direction: column;
+        gap: 6px;
+        align-items: stretch;
+    }
+
+    .icon-button {
+        width: 36px;
+        height: 36px;
+        font-size: 1em;
+    }
+
+    .speed-button {
+        padding: 4px 10px;
+        font-size: 0.9em;
+    }
+
+    #seekBar {
+        width: 100%;
+        max-width: 100%;
+    }
 }
