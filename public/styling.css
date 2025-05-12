@@ -258,13 +258,13 @@ body {
 
 .audio-error {
     color: #2a1a5e;
-    /* Red for visibility */
     font-weight: bold;
     margin: 10px 0;
 }
 
 .audio-controls-full {
-    display: flex;
+    display: none;
+    /* initially hidden */
     flex-direction: column;
     align-items: center;
     gap: 12px;
@@ -272,8 +272,8 @@ body {
     border-radius: 16px;
     padding: 20px;
     color: white;
-    width: 100%;
-    max-width: 600px;
+    width: 90%;
+    max-width: 400px;
     margin: 0 auto;
 }
 

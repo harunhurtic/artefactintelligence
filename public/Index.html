@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="styling.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
 
@@ -21,7 +22,7 @@
         let audio = null;
         let audioLoadTimeout = null;  // Global timeout tracker
         let currentThreadId = null; // Global variable to store threadId
-        let controlsExpandesd = true;  // Track expand/collapse state
+        let controlsExpanded = true;  // Track expand/collapse state
         let currentArtefact = null;
 
         const questions = [
@@ -414,16 +415,16 @@
 
         <div id="audio-controls-full" class="audio-controls-full">
   <div class="button-group">
-    <button id="rewindButton" class="icon-button">⏪</button>
-    <button id="playPauseButton" class="icon-button">▶️</button>
-    <button id="forwardButton" class="icon-button">⏩</button>
-  </div>
+  <button id="rewindButton" class="icon-button"><i class="fas fa-backward"></i></button>
+  <button id="playPauseButton" class="icon-button"><i class="fas fa-play"></i></button>
+  <button id="forwardButton" class="icon-button"><i class="fas fa-forward"></i></button>
+</div>
   <div class="timeline-group">
     <span id="currentTime">0:00</span>
     <input type="range" id="seekBar" value="0" min="0" step="0.1">
     <span id="duration">0:00</span>
   </div>
-  <button id="speedButton" class="speed-button">1x</button>
+  <button id="speedButton" class="speed-button">Speed 1x</button>
 </div>
     <button id="moreInfoButton" onclick="requestMoreInfo('${artefact}', '${profile}')" class="audio-button" style="display: none;">💬 Tell Me More</button>
 </div>
@@ -694,13 +695,17 @@
 
                     audio.addEventListener("loadeddata", () => {
                         hasAudioLoaded = true;
+                        const icon = playButton.querySelector("i");
+                        icon.classList.remove("fa-pause");
+                        icon.classList.add("fa-play");
+
                         loadingIndicator.style.display = "none";
                         playButton.style.display = "block";
                         speedButton.style.display = "block";
                         forwardButton.style.display = "block";
                         rewindButton.style.display = "block";
-                        playButton.innerText = "▶️";
                         moreInfoButton.style.display = "block";
+                        document.getElementById("audio-controls-full").style.display = "flex";
 
                         // Timestamps and Seek Bar Logic
                         document.querySelector(".timeline-group").style.display = "flex";
@@ -765,27 +770,31 @@
                         rewindButton.style.display = "block";
                         forwardButton.style.display = "block";
                         speedButton.style.display = "block";
-                        playButton.innerText = "▶️";
                         moreInfoButton.style.display = "block";
                     }
 
                     // Corrected Play/Pause Logic
                     playButton.onclick = () => {
+                        const icon = playButton.querySelector("i");
                         if (audio.paused) {
                             audio.play().then(() => {
-                                playButton.innerText = "⏸";
+                                icon.classList.remove("fa-play");
+                                icon.classList.add("fa-pause");
                             }).catch(err => {
                                 console.error("⚠️ Audio playback failed:", err);
                                 showAudioError(playButton, "⚠️ The narrator couldn't narrate. Try again later.");
                             });
                         } else {
                             audio.pause();
-                            playButton.innerText = "▶️";
+                            icon.classList.remove("fa-pause");
+                            icon.classList.add("fa-play");
                         }
                     };
 
                     audio.onended = () => {
-                        playButton.innerText = "▶️";
+                        const icon = playButton.querySelector("i");
+                        icon.classList.remove("fa-pause");
+                        icon.classList.add("fa-play");
                     };
 
                     // Timeout fallback if audio doesn't load in 7 seconds
@@ -837,11 +846,15 @@
                 document.getElementById("audio-loading").style.display = "none";
                 document.getElementById("playPauseButton").style.display = "block";
 
-                document.getElementById("playPauseButton").innerText = "⏸";
+                const icon = document.getElementById("playPauseButton").querySelector("i");
+                icon.classList.remove("fa-play");
+                icon.classList.add("fa-pause");
+
                 audio.play();
 
                 audio.onended = () => {
-                    document.getElementById("playPauseButton").innerText = "▶️";
+                    icon.classList.remove("fa-pause");
+                    icon.classList.add("fa-play");
                 };
 
             } catch (error) {
@@ -858,13 +871,11 @@
             if (audio.paused) {
                 audio.play().then(() => {
                     console.log("✅ Audio started.");
-                    playButton.innerText = "⏸";
                 }).catch(error => {
                     console.warn("⚠️ Audio play blocked, user interaction required.", error);
                 });
             } else {
                 audio.pause();
-                playButton.innerText = "▶️";
             }
         }
 
