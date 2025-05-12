@@ -156,7 +156,7 @@
             // Initial Welcome Screen with Start Button
             quizContainer.innerHTML = `
     <div class="card">
-        <h1 id="quiz-title">Welcome to the Museum! 🏛️ </h1>
+        <h1 id="quiz-title">Welcome to the Museum! <i class="fa-solid fa-building-columns"></i> </h1>
         <h3 id="pleaseAnswerQuestionsText">Please take a moment to answer a few questions so we can personalize your museum experience ✨</h3>
         <button onclick="renderQuestionnaire()" class="nav-button">Start</button>
     </div>
@@ -340,7 +340,7 @@
             document.getElementById("quiz-container").innerHTML = `
         <!-- Title/Profile Section -->
         <div class="artefacts-container">
-            <h1>Museum - Artefacts</h1>
+            <h1><i class="fa-solid fa-building-columns"></i> Museum - Artefacts </h1>
             <p><strong>Assigned Profile:</strong> ${profile}</p>
               <p><strong>Language:</strong> ${languageDisplay} </p>
                 <p><strong>Narrator:</strong> ${voiceDisplay}</p>
@@ -408,14 +408,17 @@
 
         <div class="artefacts-container">
             <h2>${artefact}</h2>
-            <p id="loading" class="loading">🔄 Adapting description...</p>
+            <p id="loading" class="loading"><i class="fa-solid fa-arrows-rotate"></i> Adapting description...</p>
             <p id="artefact-description" class="artefact-text"></p>
         </div>
 
         <!-- Sticky Audio Controls at the Bottom (Hidden Initially) -->
         <div id="sticky-audio-controls" class="sticky-audio-controls hidden">
-    <button id="toggle-controls" onclick="toggleStickyControls()">⬇️</button>
-    <p id="audio-loading" class="loading" style="display: none;">🔊 The narrator is getting ready...</p>
+    <span id="toggle-controls" class="fa-stack toggle-icon" onclick="toggleStickyControls()">
+  <i class="fa-solid fa-circle fa-stack-2x background-circle"></i>
+  <i id="toggle-icon-arrow" class="fa-solid fa-arrow-down fa-stack-1x arrow-icon"></i>
+</span>
+    <p id="audio-loading" class="loading" style="display: none;"><i class="fa-solid fa-volume-high"></i> The narrator is getting ready...</p>
 
         <div id="audio-controls-full" class="audio-controls-full">
   <div class="button-group">
@@ -430,7 +433,7 @@
   </div>
   <button id="speedButton" class="speed-button">Speed 1x</button>
 </div>
-    <button id="moreInfoButton" onclick="requestMoreInfo('${artefact}', '${profile}')" class="audio-button" style="display: none;">💬 Tell Me More</button>
+    <button id="moreInfoButton" onclick="requestMoreInfo('${artefact}', '${profile}')" class="audio-button" style="display: none;">Tell Me More <i class="fa-solid fa-comment-dots"></i> </button>
 </div>
     `;
 
@@ -585,7 +588,7 @@
             moreInfoButton.style.display = "none";
             loadingIndicator.style.display = "none";
 
-            document.getElementById("artefact-description").innerHTML = `<span class="loading">🔄 Getting more details...</span>`;
+            document.getElementById("artefact-description").innerHTML = `<span class="loading"> <i class="fa fa-refresh"></i> Getting more details...</span>`;
 
             fetch("https://artefactintelligence.hurtic.net/fetch-more-info", {
                 method: "POST",
@@ -597,17 +600,11 @@
                 .then(data => {
                     // Check if the user has navigated away before updating the UI
                     if (requestedArtefact !== currentArtefact) {
-                        console.log("🔄 User navigated away. Ignoring outdated response.");
+                        console.log("User navigated away. Ignoring outdated response.");
                         return;
                     }
 
                     document.getElementById("artefact-description").innerText = data.response;
-
-                    // Re-show sticky controls after content loads
-                    setTimeout(() => {
-                        document.getElementById("sticky-audio-controls").classList.remove("hidden");
-                        document.getElementById("sticky-audio-controls").classList.add("visible");
-                    }, 300);
 
                     if (deliveryPreference === "Auditory") {
                         loadingIndicator.style.display = "block";
@@ -885,26 +882,27 @@
 
         function toggleStickyControls() {
             const stickyControls = document.getElementById('sticky-audio-controls');
-            const toggleButton = document.getElementById('toggle-controls');
+            const arrowIcon = document.getElementById('toggle-icon-arrow');
 
             if (controlsExpanded) {
-                // Collapse sticky controls
                 stickyControls.classList.add('collapsed');
-                toggleButton.innerText = '⬆️';  // Change to up arrow
+                arrowIcon.classList.remove('fa-arrow-down');
+                arrowIcon.classList.add('fa-arrow-up');
             } else {
-                // Expand sticky controls
                 stickyControls.classList.remove('collapsed');
-                toggleButton.innerText = '⬇️';  // Change to down arrow
+                arrowIcon.classList.remove('fa-arrow-up');
+                arrowIcon.classList.add('fa-arrow-down');
             }
 
             controlsExpanded = !controlsExpanded;
         }
 
+
         function renderPreferences() {
             document.getElementById("quiz-container").innerHTML = `
                 <h2>Update Your Preferences</h2>
                 <div id="quiz"></div>
-                <button onclick="showArtefacts(getAssignedProfile())" class="nav-button">➡️ Continue to Artefacts</button>
+                <button onclick="showArtefacts(getAssignedProfile())" class="nav-button"> <i class="fas fa-arrow-right"></i>  Continue to Artefacts</button>
     `;
 
             renderQuiz(); // Re-render the questionnaire and restore previous selections

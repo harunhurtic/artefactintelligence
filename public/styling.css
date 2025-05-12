@@ -250,7 +250,7 @@ body {
     font-size: 1.5em;
     cursor: pointer;
     position: absolute;
-    top: -20px;
+    top: -38px;
     left: 50%;
     transform: translateX(-50%);
     color: #5c3d9e;
@@ -376,4 +376,24 @@ body {
         width: 100%;
         max-width: 100%;
     }
+}
+
+.toggle-icon {
+    /* optional */
+    font-size: 0.85em;
+    cursor: pointer;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.background-circle {
+    color: #3b1a83;
+    /* dark purple circle */
+}
+
+.arrow-icon {
+    color: #ffffff;
+    /* white arrow */
 }
