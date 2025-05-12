@@ -617,13 +617,6 @@
                             document.getElementById("sticky-audio-controls").classList.add("visible");
                         }, 300);
                     }
-
-                    if (deliveryPreference === "Auditory") {
-                        loadingIndicator.style.display = "block";
-                        requestTTS(data.response, true);
-                    } else {
-                        moreInfoButton.style.display = "block";
-                    }
                 })
                 .catch(error => {
                     if (error.name === "AbortError") {
@@ -722,6 +715,11 @@
 
                         // Timestamps and Seek Bar Logic
                         document.querySelector(".timeline-group").style.display = "flex";
+
+                        // SHOW sticky controls ONLY after audio is ready
+                        document.getElementById("sticky-audio-controls").classList.remove("hidden");
+                        document.getElementById("sticky-audio-controls").classList.add("visible");
+
                         const seekBar = document.getElementById("seekBar");
                         const currentTimeDisplay = document.getElementById("currentTime");
                         const durationDisplay = document.getElementById("duration");
@@ -738,7 +736,9 @@
 
                         // Allow user to scrub audio
                         seekBar.oninput = () => {
-                            audio.currentTime = seekBar.value;
+                            if (audio) {
+                                audio.currentTime = seekBar.value;
+                            }
                         };
 
                         // Utility to format time as M:SS
@@ -747,7 +747,6 @@
                             const secs = Math.floor(seconds % 60);
                             return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
                         }
-
 
                         // Setup Rewind Button
                         document.getElementById("rewindButton").onclick = () => {
