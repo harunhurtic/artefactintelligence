@@ -1,4 +1,4 @@
-📱 Welcome to the repository for Artefact Intelligence — a proof of concept prototype designed to enhance museum visitor engagement by adapting and delivering personalized artefact descriptions using AI, based on John H. Falk’s Museum Visitor Experience Model. This web-application uses a custom AI assistant powered by GPT-4o-mini using OpenAI's Assistant's API and Audio API to personalize and narrate museum artefact descriptions.
+📱 Welcome to the repository for Artefact Intelligence: a proof of concept prototype designed to enhance museum visitor engagement by adapting and delivering personalized artefact descriptions using AI, based on John H. Falk’s Museum Visitor Experience Model. This web-application uses a custom AI assistant powered by GPT-4o-mini using OpenAI's Assistant's API and Audio API to personalize and narrate museum artefact descriptions.
 
 Try Out The Prototype Here: https://artefactintelligence.hurtic.net
 
